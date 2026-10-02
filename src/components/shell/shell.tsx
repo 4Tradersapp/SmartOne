@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Bell,
   Building2,
@@ -24,6 +24,7 @@ import {
 import { useDemo } from "@/components/providers/demo-provider";
 import { NAV, ROLE_ORDER, ROLES, viewFromPath } from "@/lib/rbac";
 import { scopeAlerts } from "@/lib/scope";
+import { cx } from "@/lib/format";
 import type { RoleId, ViewId } from "@/lib/types";
 
 const ICONS: Record<ViewId, LucideIcon> = {
@@ -49,11 +50,21 @@ export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const current = viewFromPath(pathname);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Perfil sem acesso à tela atual: volta para a tela inicial do perfil
   useEffect(() => {
     if (current && !role.nav.includes(current)) router.replace(NAV[role.home].path);
   }, [current, role, router]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.classList.toggle("nav-open", menuOpen);
+    return () => document.body.classList.remove("nav-open");
+  }, [menuOpen]);
 
   const open = scopeAlerts(role, alerts).filter((a) => a.status !== "encerrado").length;
   const prod = role.nav.filter((k) => NAV[k].group === "prod");
@@ -62,7 +73,13 @@ export function Shell({ children }: { children: ReactNode }) {
   const item = (k: ViewId) => {
     const Icon = ICONS[k];
     return (
-      <Link key={k} href={NAV[k].path} className="nav" aria-current={current === k ? "page" : undefined}>
+      <Link
+        key={k}
+        href={NAV[k].path}
+        className="nav"
+        aria-current={current === k ? "page" : undefined}
+        onClick={() => setMenuOpen(false)}
+      >
         <Icon aria-hidden="true" strokeWidth={1.7} />
         <span>{NAV[k].label}</span>
         {k === "alertas" && open ? <span className="count">{open}</span> : null}
@@ -72,7 +89,10 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
-      <aside className="rail" aria-label="Navegação">
+      {menuOpen ? (
+        <button type="button" className="rail-scrim" aria-label="Fechar menu" onClick={() => setMenuOpen(false)} />
+      ) : null}
+      <aside className={cx("rail", menuOpen && "open")} id="app-rail" aria-label="Navegação">
         <div className="brand">
           <div className="mark" aria-hidden="true">
             S1
@@ -100,6 +120,15 @@ export function Shell({ children }: { children: ReactNode }) {
       </aside>
       <div className="main">
         <header className="topbar">
+          <button
+            type="button"
+            className="menu-btn"
+            aria-expanded={menuOpen}
+            aria-controls="app-rail"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            Menu
+          </button>
           <div className="tenant">
             <b>Grupo FortSvig</b>
             <span>{role.subtitle}</span>
