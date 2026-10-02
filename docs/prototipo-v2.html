@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Central do Grupo FortSvig</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: app shell de operação — trilho azul-marinho à esquerda, área de trabalho em papel frio; números em mono tabular, vermelho só para risco */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --surface-2:#EDF0F4; --line:#DADFE7; --line-2:#C7CEDA;
+  --ink:#0E1B33; --ink-2:#46536A; --ink-3:#69758A;
+  --rail:#0E1B33; --rail-2:#17294B; --on-rail:#E9EEF6; --on-rail-2:#9DAECB;
+  --primary:#0E1B33; --on-primary:#FFFFFF; --focus:#1D5FD1;
+  --ok:#1E7F47; --ok-bg:#E3F3EA; --warn:#9A6400; --warn-bg:#FBF0DA; --crit:#C8102E; --crit-bg:#FBE4E8; --idle:#7A8496; --idle-bg:#ECEEF2;
+  --c1:#B07A00; --c2:#B8338A; --c3:#D9530F; --c4:#1D5FD1;
+  --chart-a:#7A8496; --chart-b:#0E1B33; --plate:#1F4FA3;
+  --shadow:0 1px 2px rgba(14,27,51,.06),0 4px 14px rgba(14,27,51,.06);
+  --font-display:"Saira Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --font-body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A111E; --surface:#111A29; --surface-2:#172235; --line:#22304A; --line-2:#2E3E5C;
+  --ink:#E7ECF4; --ink-2:#AEB9CB; --ink-3:#8593AA;
+  --rail:#070D19; --rail-2:#13203A; --on-rail:#E7ECF4; --on-rail-2:#8C9DBA;
+  --primary:#E7ECF4; --on-primary:#0A111E; --focus:#5B92F0;
+  --ok:#43B97A; --ok-bg:#12301F; --warn:#E3A945; --warn-bg:#33270F; --crit:#F2506A; --crit-bg:#3A1520; --idle:#8593AA; --idle-bg:#1B2537;
+  --c1:#C08A0E; --c2:#CC4FA8; --c3:#E0621F; --c4:#4C86E8;
+  --chart-a:#8593AA; --chart-b:#7FA8F2; --plate:#4A7BD6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0A111E; --surface:#111A29; --surface-2:#172235; --line:#22304A; --line-2:#2E3E5C;
+  --ink:#E7ECF4; --ink-2:#AEB9CB; --ink-3:#8593AA;
+  --rail:#070D19; --rail-2:#13203A; --on-rail:#E7ECF4; --on-rail-2:#8C9DBA;
+  --primary:#E7ECF4; --on-primary:#0A111E; --focus:#5B92F0;
+  --ok:#43B97A; --ok-bg:#12301F; --warn:#E3A945; --warn-bg:#33270F; --crit:#F2506A; --crit-bg:#3A1520; --idle:#8593AA; --idle-bg:#1B2537;
+  --c1:#C08A0E; --c2:#CC4FA8; --c3:#E0621F; --c4:#4C86E8;
+  --chart-a:#8593AA; --chart-b:#7FA8F2; --plate:#4A7BD6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--font-display);letter-spacing:.01em;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.85rem;font-weight:700}
+h2{font-size:1.3rem;font-weight:600}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+.num,.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.muted{color:var(--ink-2)}
+.small{font-size:.85rem}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%;background:linear-gradient(to right,var(--rail) 248px,transparent 248px)}
+.rail{background:var(--rail);color:var(--on-rail);padding:20px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.mark{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#C8102E 0 50%,#1F3A6B 50% 100%);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;color:#fff;font-size:.95rem;flex:none}
+.brand b{font-family:var(--font-display);font-size:1.05rem;letter-spacing:.06em;display:block;line-height:1.1}
+.brand span{font-size:.72rem;color:var(--on-rail-2);letter-spacing:.08em;text-transform:uppercase}
+.navgroup{display:flex;flex-direction:column;gap:2px}
+.navgroup .eyebrow{color:var(--on-rail-2);padding:0 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--on-rail);text-decoration:none;font-size:.93rem;border:0;background:none;text-align:left;width:100%}
+.nav svg{width:18px;height:18px;flex:none;opacity:.85}
+.nav:hover{background:var(--rail-2)}
+.nav[aria-current="page"]{background:var(--rail-2);box-shadow:inset 3px 0 0 #E2334F}
+.nav .count{margin-left:auto;font-family:var(--font-mono);font-size:.75rem;background:#C8102E;color:#fff;border-radius:999px;padding:0 7px}
+.rail-foot{margin-top:auto;font-size:.75rem;color:var(--on-rail-2);padding:0 8px;line-height:1.45}
+.main{min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 28px}
+.topbar .tenant{display:flex;flex-direction:column;min-width:0}
+.topbar .tenant b{font-family:var(--font-display);font-size:1.05rem;letter-spacing:.03em}
+.topbar .tenant span{font-size:.78rem;color:var(--ink-3)}
+.topbar .spacer{flex:1}
+.viewas{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 14px}
+.viewas label{font-size:.78rem;color:var(--ink-3);white-space:nowrap}
+.viewas select{border:0;background:var(--surface-2);border-radius:999px;padding:6px 10px;font-weight:600;font-size:.85rem;max-width:56vw}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.75rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);white-space:nowrap}
+.chip.demo{border-style:dashed}
+.content{padding:24px 28px 56px;display:flex;flex-direction:column;gap:22px;max-width:1440px;width:100%}
+.pagehead{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.pagehead p{max-width:68ch}
+.scope{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--focus);border-radius:8px;padding:10px 14px;font-size:.88rem}
+
+/* Building blocks */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .v{font-family:var(--font-display);font-size:2rem;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:1rem;color:var(--ink-3);font-weight:600}
+.kpi .d{font-size:.8rem;color:var(--ink-2)}
+.kpi.alert{border-color:color-mix(in srgb,var(--crit) 45%,var(--line))}
+.kpi.alert .v{color:var(--crit)}
+.cols-2{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr)}
+.cols-2e{grid-template-columns:repeat(2,minmax(0,1fr))}
+.companies{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.co{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.co::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--cc)}
+.co-h{display:flex;align-items:center;gap:8px}
+.co-h b{font-family:var(--font-display);font-size:1.1rem;letter-spacing:.02em}
+.co-h span{font-size:.78rem;color:var(--ink-3)}
+.co-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.co-stats div{display:flex;flex-direction:column}
+.co-stats b{font-family:var(--font-mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.co-stats span{font-size:.72rem;color:var(--ink-3)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--cc);display:inline-block;flex:none}
+.c1{--cc:var(--c1)}.c2{--cc:var(--c2)}.c3{--cc:var(--c3)}.c4{--cc:var(--c4)}
+.spark{width:100%;height:auto;display:block;overflow:visible}
+.companies.single{grid-template-columns:minmax(0,440px)}
+.spark text{font-family:var(--font-mono);font-size:11px;fill:var(--ink-2)}
+
+/* status pills */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:.74rem;font-weight:600;white-space:nowrap}
+.s-ok{background:var(--ok-bg);color:var(--ok)}
+.s-warn{background:var(--warn-bg);color:var(--warn)}
+.s-crit{background:var(--crit-bg);color:var(--crit)}
+.s-idle{background:var(--idle-bg);color:var(--idle)}
+.s-info{background:color-mix(in srgb,var(--focus) 14%,transparent);color:var(--focus)}
+
+/* posto board */
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:0 22px}
+.brow{display:grid;grid-template-columns:minmax(90px,128px) minmax(0,1fr);align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);min-width:0}
+.pps{display:flex;flex-wrap:wrap;gap:4px}
+.brow .n{font-size:.84rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 6px;border-radius:6px;font-size:.72rem;font-weight:700;border:1px solid transparent}
+.pp .dot{width:7px;height:7px}
+.pp.s-ok{border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.pp.s-crit{border-color:var(--crit);animation:pulse 1.6s ease-in-out infinite}
+.pp.s-warn{border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
+@keyframes pulse{50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--crit) 22%,transparent)}}
+@media (prefers-reduced-motion: reduce){.pp.s-crit{animation:none}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;background:var(--surface-2);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.c,th.c{text-align:center}
+.cell{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:64px;height:28px;border-radius:7px;font-family:var(--font-mono);font-size:.8rem;font-weight:500;background:color-mix(in srgb,var(--cc) 14%,var(--surface));color:var(--ink);border:1px solid color-mix(in srgb,var(--cc) 45%,transparent)}
+.cell.opp{background:transparent;border:1px dashed var(--line-2);color:var(--ink-3);font-family:var(--font-body);font-size:.74rem}
+.ipo-low{color:var(--crit);font-weight:700}
+
+/* alerts */
+.alerts{display:flex;flex-direction:column;gap:10px}
+.al{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:0 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.al .stripe{background:var(--sev)}
+.al .body{padding:12px 0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.al .t{font-weight:600}
+.al .meta{font-size:.8rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.al .acts{padding:12px 14px 12px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end;max-width:420px}
+.sev-crit{--sev:var(--crit)}.sev-high{--sev:var(--c3)}.sev-med{--sev:var(--warn)}.sev-low{--sev:var(--idle)}
+.sla{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden;max-width:320px}
+.sla i{display:block;height:100%;background:var(--sev);border-radius:999px}
+.chain{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:.72rem}
+.chain span{padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink-3)}
+.chain span.done{background:var(--surface-2);color:var(--ink-2)}
+.chain span.now{border-color:var(--sev);color:var(--ink);font-weight:700}
+.chain em{color:var(--ink-3);font-style:normal}
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:.82rem;font-weight:600;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.btn.danger{color:var(--crit);border-color:color-mix(in srgb,var(--crit) 40%,var(--line))}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.fbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.82rem}
+.fbtn[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+
+/* study */
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;text-align:left}
+.tab b{font-family:var(--font-display);font-size:1.02rem}
+.tab span{display:block;font-size:.74rem;color:var(--ink-3)}
+.tab[aria-selected="true"]{border-color:var(--cc);box-shadow:inset 0 -3px 0 var(--cc)}
+.study{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.study .panel ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.study .panel li{font-size:.9rem}
+.study .panel.ask{border-style:dashed;box-shadow:none;background:transparent;grid-column:1 / -1}
+.study .panel.ask ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 28px}
+.factrow{display:flex;flex-wrap:wrap;gap:8px 22px}
+.factrow div{display:flex;flex-direction:column}
+.factrow b{font-family:var(--font-display);font-size:1.5rem;font-variant-numeric:tabular-nums}
+.factrow span{font-size:.75rem;color:var(--ink-3)}
+.tagline{display:flex;flex-wrap:wrap;gap:6px}
+.tagline .chip{font-weight:500;white-space:normal}
+
+/* plan */
+.phases{display:flex;flex-direction:column;gap:0;position:relative}
+.ph{display:grid;grid-template-columns:120px 28px minmax(0,1fr);gap:0 12px;min-width:0}
+.ph .when{font-family:var(--font-mono);font-size:.78rem;color:var(--ink-3);padding-top:18px;text-align:right}
+.ph .node{position:relative;display:flex;justify-content:center}
+.ph .node::before{content:"";position:absolute;top:0;bottom:0;width:2px;background:var(--line-2)}
+.ph:first-child .node::before{top:22px}
+.ph:last-child .node::before{bottom:calc(100% - 22px)}
+.ph .node i{position:relative;margin-top:16px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:3px solid var(--ink-2)}
+.ph.now .node i{border-color:var(--crit);background:var(--crit)}
+.ph .card{margin:8px 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ph .card ul{margin:0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.ph .deliv{font-size:.84rem;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:8px}
+.sprints{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.sprints div{background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:.82rem}
+.sprints b{display:block;font-family:var(--font-display);font-size:.95rem}
+
+/* economy */
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.78rem;color:var(--ink-2);font-weight:600}
+.field input{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:8px 10px;font-family:var(--font-mono);font-variant-numeric:tabular-nums;width:100%}
+.big{font-family:var(--font-display);font-size:2.4rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.big.good{color:var(--ok)}
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font-family:var(--font-mono);font-size:11px;fill:var(--ink-3)}
+.chart .lbl{font-family:var(--font-body);font-size:12px;font-weight:600;fill:var(--ink)}
+.swatch{width:14px;height:3px;border-radius:2px;display:inline-block;background:var(--sw)}
+
+/* phones */
+.phones{display:flex;flex-wrap:wrap;gap:18px;justify-content:flex-start}
+.phone-wrap{display:flex;flex-direction:column;gap:10px;width:256px;max-width:100%}
+.phone{width:256px;max-width:100%;border-radius:34px;background:#0B1220;padding:10px;box-shadow:var(--shadow)}
+.screen{border-radius:26px;background:var(--bg);overflow:hidden;min-height:520px;display:flex;flex-direction:column}
+.sbar{display:flex;justify-content:space-between;padding:8px 18px 4px;font-family:var(--font-mono);font-size:.7rem;color:var(--ink-2)}
+.apphead{background:#0E1B33;color:#E9EEF6;padding:12px 16px 14px;display:flex;flex-direction:column;gap:2px}
+.apphead b{font-family:var(--font-display);font-size:1.05rem}
+.apphead span{font-size:.72rem;color:#9DAECB}
+.abody{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:.8rem}
+.acard b{font-size:.86rem}
+.abtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.abtn{border-radius:12px;padding:12px 8px;font-size:.78rem;font-weight:700;text-align:center;border:1px solid var(--line);background:var(--surface)}
+.abtn.sos{background:#C8102E;color:#fff;border-color:#C8102E;grid-column:1 / -1}
+.offline{font-size:.72rem;background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:6px 10px;font-weight:600}
+.tabbar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);font-size:.65rem;color:var(--ink-3);text-align:center;padding:8px 0 10px}
+.tabbar b{color:var(--ink)}
+.cp{display:flex;align-items:center;gap:8px;font-size:.8rem;padding:6px 0;border-bottom:1px dashed var(--line)}
+.cp i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.65rem;font-weight:700;flex:none}
+.cp .ok{background:var(--ok-bg);color:var(--ok)}
+.cp .pend{background:var(--idle-bg);color:var(--idle)}
+.cp .next{background:var(--warn-bg);color:var(--warn)}
+.progress{height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--ok)}
+.wave{display:flex;gap:3px;align-items:center;height:34px;justify-content:center}
+.wave i{width:4px;border-radius:2px;background:#C8102E;display:block}
+.field-chip{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;border-bottom:1px dashed var(--line);padding:4px 0}
+.field-chip span{color:var(--ink-3)}
+.field-chip.stack{flex-direction:column;gap:2px}
+.field-chip.stack b{text-align:left;font-weight:600}
+
+/* portal */
+.portal-h{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;background:var(--rail);color:var(--on-rail);border-radius:var(--r);padding:18px 20px}
+.portal-h h2{color:var(--on-rail)}
+.portal-h span{color:var(--on-rail-2);font-size:.82rem}
+.svc-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.svc-row:last-child{border-bottom:0}
+.tl{display:flex;flex-direction:column;gap:0}
+.tl div{display:grid;grid-template-columns:52px 14px minmax(0,1fr);gap:8px;font-size:.86rem;padding:6px 0}
+.tl time{font-family:var(--font-mono);color:var(--ink-3);font-size:.78rem}
+.tl i{width:10px;height:10px;border-radius:50%;background:var(--cc);margin-top:5px}
+.docs div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.88rem}
+
+/* users */
+.hier{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.hier div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column}
+.hier b{font-size:.86rem}
+.hier span{font-size:.72rem;color:var(--ink-3)}
+.hier em{color:var(--ink-3);font-style:normal}
+.mx td.c{font-weight:700}
+.y{color:var(--ok)}.p{color:var(--warn)}.n{color:var(--ink-3)}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:.86rem;display:flex;flex-direction:column;gap:4px}
+.rule b{font-size:.9rem}
+
+/* tooltip & toast */
+.tip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.78rem;padding:6px 9px;border-radius:6px;box-shadow:var(--shadow);max-width:240px;line-height:1.35}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.88rem;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+
+
+/* v2: notificações, encomendas, acesso, morador, funcionalidades */
+.carrier{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
+.steps{display:flex;flex-direction:column;gap:7px}
+.step{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;font-size:.88rem;opacity:.4;transition:opacity .25s}
+.step.on{opacity:1}
+.step i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:.7rem;font-weight:700;background:var(--surface-2);color:var(--ink-3)}
+.step.on i{background:var(--ok-bg);color:var(--ok)}
+.step.wait i{background:var(--warn-bg);color:var(--warn)}
+.step small{display:block;color:var(--ink-3);font-size:.78rem}
+@media (prefers-reduced-motion: reduce){.step{transition:none}}
+.ev{display:grid;grid-template-columns:64px 30px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
+.ev:last-child{border-bottom:0}
+.ev time{font-family:var(--font-mono);font-size:.76rem;color:var(--ink-3)}
+.ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:.62rem;font-weight:700;letter-spacing:.02em;background:var(--surface-2);color:var(--ink-2)}
+.ic.warn{background:var(--warn-bg);color:var(--warn)}
+.ic.ok{background:var(--ok-bg);color:var(--ok)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.78rem;background:color-mix(in srgb,var(--focus) 15%,var(--surface));color:var(--focus);flex:none}
+.plate{display:inline-block;font-family:var(--font-mono);font-weight:600;letter-spacing:.08em;border:1.5px solid var(--ink-2);border-top:5px solid var(--plate);border-radius:4px;padding:0 7px;background:var(--surface);font-size:.8rem;line-height:1.5;white-space:nowrap}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who b{display:block;font-size:.88rem}
+.who span{font-size:.76rem;color:var(--ink-3)}
+.sim{border:1px dashed var(--line-2);border-radius:var(--r);padding:14px;background:var(--surface-2)}
+.composer{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px}
+.composer .field select,.composer .field textarea{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:8px 10px;width:100%;font:inherit;color:inherit}
+.composer textarea{min-height:84px;resize:vertical}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.88rem}
+.checks label{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;font-weight:400;color:var(--ink)}
+.checks input{width:auto;padding:0}
+.seg{display:inline-flex;align-self:flex-start;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--surface);padding:7px 12px;font-size:.84rem;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--primary);color:var(--on-primary)}
+.lock{background:linear-gradient(160deg,#16294d,#0b1528);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:220px}
+.lock .clock{color:#e9eef6;font-family:var(--font-display);font-size:2.2rem;text-align:center;line-height:1}
+.notif{background:rgba(255,255,255,.92);color:#0e1b33;border-radius:14px;padding:10px 12px;font-size:.8rem;display:flex;flex-direction:column;gap:3px}
+.notif .nh{display:flex;justify-content:space-between;font-size:.7rem;color:#46536a}
+.notif b{font-size:.84rem}
+.notif.crit{box-shadow:inset 3px 0 0 #C8102E}
+.queue div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
+.queue div:last-child{border-bottom:0}
+.queue span{color:var(--ink-3);font-size:.78rem}
+.sw{position:relative;width:38px;height:22px;border-radius:999px;border:0;background:var(--line-2);flex:none;padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--surface);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--ok)}
+.sw[aria-checked="true"]::after{left:19px}
+.rule-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+.rule-row:last-child{border-bottom:0}
+.rule-row b{font-size:.9rem}
+.rule-row span{display:block;font-size:.8rem;color:var(--ink-3)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:110px minmax(0,1fr) 48px;gap:10px;align-items:center;font-size:.84rem}
+.bar .track{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar .track i{display:block;height:100%;background:var(--chart-b);border-radius:999px}
+.bar b{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right}
+.prio{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.prio div{border:1px solid var(--line);border-left:4px solid var(--sev);border-radius:8px;padding:10px 12px;background:var(--surface);font-size:.84rem;display:flex;flex-direction:column;gap:2px}
+.prio b{font-size:.92rem}
+.aud{display:flex;flex-wrap:wrap;gap:4px}
+.aud span{font-size:.72rem;border-radius:999px;padding:1px 8px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.qr{width:150px;height:150px;background:#fff;border-radius:10px;padding:8px;margin:0 auto}
+.compl{display:flex;justify-content:space-between;font-size:.78rem;padding:6px 0;border-bottom:1px dashed var(--line);gap:8px}
+.compl span{color:var(--ink-3)}
+.compl .miss{color:var(--crit);font-weight:700}
+.feat-mod td:first-child{font-weight:600}
+.phase-mvp{background:var(--ok-bg);color:var(--ok)}
+.phase-2{background:color-mix(in srgb,var(--focus) 14%,transparent);color:var(--focus)}
+.phase-3{background:var(--idle-bg);color:var(--idle)}
+.who-chips{display:flex;flex-wrap:wrap;gap:4px}
+.who-chips span{font-size:.7rem;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--ink-2)}
+.dev{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
+.dev:last-child{border-bottom:0}
+.mini-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.mini-kpis button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.mini-kpis button:hover{border-color:var(--line-2)}
+.mini-kpis button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mini-kpis b{font-family:var(--font-display);font-size:1.6rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.mini-kpis span{font-size:.78rem;color:var(--ink-2)}
+@media (max-width: 880px){.composer{grid-template-columns:minmax(0,1fr)}.ev{grid-template-columns:52px 30px minmax(0,1fr)}.bar{grid-template-columns:84px minmax(0,1fr) 44px}}
+
+/* Responsive */
+@media (max-width: 1100px){.cols-2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width: 880px){
+  .shell{grid-template-columns:minmax(0,1fr);background:none}
+  .rail{position:static;height:auto;flex-direction:row;align-items:center;gap:10px;padding:10px 16px;overflow-x:auto}
+  .brand span,.rail-foot,.navgroup .eyebrow{display:none}
+  .navgroup{flex-direction:row;gap:2px}
+  .nav{white-space:nowrap;padding:8px 10px;width:auto}
+  .nav[aria-current="page"]{box-shadow:inset 0 -3px 0 #E2334F}
+  .topbar{padding:10px 16px}
+  .content{padding:18px 16px 48px}
+  .cols-2e{grid-template-columns:minmax(0,1fr)}
+  .ph{grid-template-columns:22px minmax(0,1fr)}
+  .ph .when{display:none}
+  .al{grid-template-columns:4px minmax(0,1fr)}
+  .al .acts{grid-column:2;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;padding:0 14px 12px 0}
+}
+@media (max-width: 460px){h1{font-size:1.5rem}.kpi .v{font-size:1.6rem}.big{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail" aria-label="Navegação">
+    <div class="brand"><div class="mark" aria-hidden="true">S1</div><div><b>SMART ONE</b><span>Grupo FortSvig</span></div></div>
+    <nav class="navgroup" id="nav-prod" aria-label="Produto"></nav>
+    <nav class="navgroup" id="nav-pres" aria-label="Apresentação"></nav>
+    <div class="rail-foot">Protótipo de apresentação · 4Traders<br>Dados ilustrativos, não são números reais do grupo.</div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="tenant"><b id="tb-title">Grupo FortSvig</b><span id="tb-sub">4 empresas · 18 condomínios</span></div>
+      <div class="spacer"></div>
+      <span class="chip demo">Dados ilustrativos</span>
+      <div class="viewas"><label for="role">Ver como</label>
+        <select id="role">
+          <option value="diretor">Diretor do grupo</option>
+          <option value="gerente">Gerente · Fortslimp</option>
+          <option value="supervisor">Supervisor · Infraseg</option>
+          <option value="sindico">Síndico · Res. Ipê Amarelo</option>
+          <option value="colaborador">Porteiro · celular e tablet</option>
+          <option value="morador">Morador · 1204 B</option>
+          <option value="plataforma">Administrador da plataforma</option>
+        </select>
+      </div>
+    </header>
+    <main class="content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const fmt = n => Number(n).toLocaleString('pt-BR');
+const brl = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+const mil = n => 'R$ ' + (Math.round(n/1000)).toLocaleString('pt-BR') + ' mil';
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const R = rng(20261002);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const ICON = {
+  visao:'<path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/>',
+  condominios:'<path d="M4 21V5l7-2v18M11 21h9V9l-9-2M7 8h1M7 12h1M7 16h1M14 12h3M14 16h3"/>',
+  alertas:'<path d="M12 3 2 20h20L12 3Zm0 6v5m0 3v.5"/>',
+  portal:'<path d="M3 4h18v12H3zM8 20h8M12 16v4"/>',
+  app:'<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  usuarios:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.7 3 2.4 3.5 5.2"/>',
+  master:'<path d="M12 2 3 6v6c0 5 3.8 9.3 9 10 5.2-.7 9-5 9-10V6l-9-4Z"/>',
+  estudo:'<path d="M4 4h11l5 5v11H4zM15 4v5h5M8 13h8M8 17h6"/>',
+  plano:'<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="18" cy="6" r="2"/><circle cx="15" cy="18" r="2"/>',
+  economia:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+  notificacoes:'<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16ZM10 20.5a2 2 0 0 0 4 0"/>',
+  encomendas:'<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9ZM3 7.5l9 4.5 9-4.5M12 12v9"/>',
+  acesso:'<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 17c.8-2 2.2-3 4-3s3.2 1 4 3"/>',
+  morador:'<path d="M3 11 12 4l9 7M5 10v10h14V10M10 20v-5h4v5"/>',
+  funcionalidades:'<path d="M4 5h4v4H4zM10 7h10M4 15h4v4H4zM10 17h10"/>'
+};
+const svgI = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+/* ---------- dados ilustrativos ---------- */
+const COMPANIES = [
+  {id:'infraseg',   name:'Infraseg',    tag:'Infraestrutura em serviços gerais', short:'Portaria e acesso', cls:'c1', L:'I', base:93},
+  {id:'fortslimp',  name:'Fortslimp',   tag:'Limpeza e conservação',             short:'Limpeza',           cls:'c2', L:'L', base:89},
+  {id:'fortsbravo', name:'Fortsbravo',  tag:'Brigada de incêndio',               short:'Brigada',           cls:'c3', L:'B', base:96},
+  {id:'fortservice',name:'Fortservice', tag:'Serviços especializados',           short:'Manutenção',        cls:'c4', L:'S', base:87}
+];
+const CO = Object.fromEntries(COMPANIES.map(c=>[c.id,c]));
+const MAP = {I:'infraseg',L:'fortslimp',B:'fortsbravo',S:'fortservice'};
+const CONDOS = [
+  ['c1','Residencial Ipê Amarelo','ILBS',240,'Residencial'],
+  ['c2','Condomínio Jardim das Acácias','IL',180,'Residencial'],
+  ['c3','Edifício Mirante do Vale','ILB',320,'Residencial'],
+  ['c4','Residencial Parque dos Ventos','I',96,'Residencial'],
+  ['c5','Condomínio Villa Toscana','ILS',150,'Residencial'],
+  ['c6','Edifício Solar das Palmeiras','I',64,'Residencial'],
+  ['c7','Residencial Grand Brasil','ILBS',410,'Residencial'],
+  ['c8','Condomínio Recanto Verde','I',120,'Residencial'],
+  ['c9','Edifício Atlântico Office','IB',180,'Comercial'],
+  ['c10','Residencial Bosque Imperial','IL',200,'Residencial'],
+  ['c11','Condomínio Alto da Serra','I',88,'Residencial'],
+  ['c12','Edifício Portal do Sol','IS',72,'Residencial'],
+  ['c13','Residencial Vila Romana','IL',160,'Residencial'],
+  ['c14','Condomínio Reserva das Flores','I',110,'Residencial'],
+  ['c15','Edifício Torre Azul Corporate','ILB',220,'Comercial'],
+  ['c16','Residencial Morada do Lago','IS',140,'Residencial'],
+  ['c17','Condomínio Quinta da Mata','I',52,'Residencial'],
+  ['c18','Residencial Nova Aliança','ILB',260,'Residencial']
+].map(([id,name,code,size,kind])=>({id,name,code,size,kind,svc:{}}));
+const CD = Object.fromEntries(CONDOS.map(c=>[c.id,c]));
+
+const hour = new Date().getHours();
+const isDay = hour>=7 && hour<19;
+CONDOS.forEach(c=>{
+  for(const ch of c.code){
+    const id = MAP[ch]; let postos, colab, desc, h24;
+    if(id==='infraseg'){postos=c.size>250?3:c.size>120?2:1;colab=postos*4;desc='Portaria 24h · escala 12x36';h24=true;}
+    if(id==='fortslimp'){postos=Math.max(1,Math.ceil(c.size/90));colab=postos;desc='Limpeza diurna · 44h semanais';h24=false;}
+    if(id==='fortsbravo'){h24=c.size>300||c.kind==='Comercial';postos=1;colab=h24?4:2;desc=h24?'Bombeiro civil 24h · 12x36':'Bombeiro civil diurno';}
+    if(id==='fortservice'){postos=1;colab=1;desc='Zeladoria técnica diurna';h24=false;}
+    const ipo = clamp(Math.round(CO[id].base + (R()*8-4)),70,99);
+    const tasks = postos*({infraseg:14,fortslimp:18,fortsbravo:10,fortservice:6}[id]);
+    c.svc[id] = {postos,colab,desc,h24,ipo,tasks};
+  }
+});
+CD.c13.svc.infraseg.ipo = 74; CD.c11.svc.infraseg.ipo = 81; CD.c16.svc.fortservice.ipo = 79;
+CONDOS.forEach(c=>Object.values(c.svc).forEach(s=>{
+  s.done = Math.round(s.tasks*s.ipo/100*.93);
+  s.missed = Math.round(s.tasks*(100-s.ipo)/100*.6);
+  s.pending = Math.max(0,s.tasks-s.done-s.missed);
+}));
+/* postos individuais e estado agora */
+const POSTOS = [];
+CONDOS.forEach(c=>Object.entries(c.svc).forEach(([id,s])=>{
+  for(let i=1;i<=s.postos;i++){
+    let st = (s.h24 || isDay) ? 'ok' : 'idle';
+    POSTOS.push({condo:c.id,company:id,idx:i,desc:s.desc,status:st});
+  }
+}));
+const setSt=(c,co,i,st)=>{const p=POSTOS.find(p=>p.condo===c&&p.company===co&&p.idx===i);if(p)p.status=st;};
+setSt('c13','infraseg',2,'crit'); setSt('c17','infraseg',1,'warn'); setSt('c9','fortsbravo',1,'warn');
+
+/* tendência 14 dias por empresa */
+const TREND = {};
+COMPANIES.forEach(co=>{const r=rng(co.base*97);TREND[co.id]=Array.from({length:14},(_,i)=>clamp(Math.round(co.base-2+r()*5+(i>9?1:0)),70,100));});
+TREND.infraseg[13]=91;
+
+const ALERTS = [
+  {id:1,sev:'crit',t:'Posto descoberto',d:'Portaria · posto 2 · turno 12x36 sem check-in',condo:'c13',company:'infraseg',open:38,sla:15,status:'escalado',step:5,who:'Anderson Lima (coordenador)'},
+  {id:2,sev:'high',t:'Ronda perimetral incompleta',d:'3 de 8 pontos NFC lidos na ronda das 02:00',condo:'c11',company:'infraseg',open:24,sla:30,status:'novo',step:1,who:''},
+  {id:3,sev:'high',t:'Extintor com recarga vencida',d:'Torre B · 3º andar · venceu há 4 dias',condo:'c9',company:'fortsbravo',open:95,sla:240,status:'assumido',step:1,who:'Fernanda Alves'},
+  {id:4,sev:'med',t:'Aparelho do posto sem sinal',d:'Último envio há 22 min · 2 registros na fila',condo:'c17',company:'infraseg',open:22,sla:30,status:'novo',step:1,who:''},
+  {id:5,sev:'med',t:'Insumo abaixo do mínimo',d:'Papel toalha e desinfetante · estoque para 2 dias',condo:'c10',company:'fortslimp',open:180,sla:1440,status:'assumido',step:1,who:'Paula Ribeiro'},
+  {id:6,sev:'med',t:'Reciclagem de brigada vence em 12 dias',d:'2 bombeiros civis · IT 17 exige reciclagem a cada 12 meses',condo:'c3',company:'fortsbravo',open:600,sla:4320,status:'novo',step:1,who:''},
+  {id:7,sev:'med',t:'Chamado do síndico: bomba de recalque com ruído',d:'Aberto pelo portal do cliente · foto anexada',condo:'c16',company:'fortservice',open:70,sla:240,status:'novo',step:1,who:''},
+  {id:8,sev:'low',t:'14 encomendas aguardando há mais de 48h',d:'Lembrete automático enviado por WhatsApp aos moradores',condo:'c7',company:'infraseg',open:300,sla:2880,status:'novo',step:1,who:''},
+  {id:9,sev:'med',t:'Roteiro de limpeza atrasado',d:'Garagem G2 · previsto 15:00 · sem registro',condo:'c15',company:'fortslimp',open:48,sla:60,status:'novo',step:1,who:''}
+];
+const SEV = {crit:['Crítico','s-crit','sev-crit'],high:['Alto','s-warn','sev-high'],med:['Médio','s-warn','sev-med'],low:['Baixo','s-idle','sev-low']};
+const CHAIN = ['Push no app','Supervisor','WhatsApp','Ligação automática','Coordenador'];
+
+const USERS = [
+  ['Você','Diretor do grupo','Grupo inteiro','Ativo · MFA'],
+  ['Paula Ribeiro','Gerente da empresa','Fortslimp','Ativo · MFA'],
+  ['Fernanda Alves','Gerente da empresa','Fortsbravo','Ativo · MFA'],
+  ['Anderson Lima','Coordenador operacional','Infraseg · 18 condomínios','Ativo'],
+  ['Ricardo Souza','Supervisor volante','Infraseg · 7 condomínios','Ativo'],
+  ['Juliana Costa','RH / DP','Grupo inteiro','Ativo'],
+  ['Fábio Teixeira','Financeiro / comercial','Grupo inteiro','Convite enviado'],
+  ['Carlos Nogueira','Colaborador de campo','Res. Ipê Amarelo · Portaria','Ativo'],
+  ['Antônio Mendes','Síndico','Res. Ipê Amarelo','Ativo'],
+  ['Marina Costa','Morador','Res. Ipê Amarelo · 1204 B','Ativo'],
+  ['Tablet da portaria','Dispositivo da portaria','Res. Ipê Amarelo','Ativo'],
+  ['Suporte 4Traders','Administrador da plataforma','Acesso só com autorização','Auditado']
+];
+
+/* ---------- perfis ---------- */
+const ROLES = {
+  diretor:{label:'Diretor do grupo',nav:['visao','condominios','alertas','notificacoes','encomendas','acesso','portal','app','morador','usuarios','estudo','funcionalidades','plano','economia'],company:null,condos:null,home:'visao'},
+  gerente:{label:'Gerente da Fortslimp',nav:['visao','condominios','alertas','notificacoes','usuarios'],company:'fortslimp',condos:null,home:'visao',
+    scope:'Você vê só a operação da Fortslimp: 9 condomínios, equipes e alertas de limpeza. Financeiro e as outras empresas ficam ocultos.'},
+  supervisor:{label:'Supervisor da Infraseg',nav:['visao','condominios','alertas','encomendas','acesso','app'],company:'infraseg',condos:['c1','c4','c6','c8','c11','c13','c17'],home:'alertas',
+    scope:'Você vê só os 7 condomínios da sua rota na Infraseg. Pode assumir alertas e aprovar justificativas; não exclui registros.'},
+  sindico:{label:'Síndico',nav:['portal','notificacoes'],company:null,condos:['c1'],home:'portal'},
+  colaborador:{label:'Porteiro',nav:['app','encomendas','acesso'],company:'infraseg',condos:['c1'],home:'app',
+    scope:'Porteiro do Residencial Ipê Amarelo: vê só a portaria onde está escalado, com encomendas, visitantes e tarefas do turno.'},
+  morador:{label:'Morador',nav:['morador'],company:null,condos:['c1'],home:'morador'},
+  plataforma:{label:'Administrador da plataforma',nav:['master','usuarios'],company:null,condos:null,home:'master',
+    scope:'Visão da 4Traders: contas, módulos, uso e saúde. Dados operacionais do grupo só são abertos com autorização registrada.'}
+};
+const NAV = {
+  visao:['Visão do grupo','prod'], condominios:['Condomínios','prod'], alertas:['Central de alertas','prod'], portal:['Portal do síndico','prod'],
+  app:['App do colaborador','prod'], usuarios:['Usuários e permissões','prod'], master:['Master da plataforma','prod'],
+  notificacoes:['Notificações','prod'], encomendas:['Encomendas','prod'], acesso:['Controle de acesso','prod'], morador:['App do morador','prod'],
+  estudo:['Estudo das empresas','pres'], funcionalidades:['Mapa de funcionalidades','pres'], plano:['Plano passo a passo','pres'], economia:['Economia','pres']
+};
+let state = {role:'diretor', view:'visao', alertFilter:'todos', studyTab:'infraseg', alertState:{}};
+
+function scopeCondos(){
+  const r = ROLES[state.role];
+  return CONDOS.filter(c=>(!r.condos||r.condos.includes(c.id)) && (!r.company||c.svc[r.company]));
+}
+function scopeCompanies(){const r=ROLES[state.role];return r.company?[CO[r.company]]:COMPANIES;}
+function scopePostos(){const r=ROLES[state.role];const ids=new Set(scopeCondos().map(c=>c.id));return POSTOS.filter(p=>ids.has(p.condo)&&(!r.company||p.company===r.company));}
+function scopeAlerts(){const r=ROLES[state.role];const ids=new Set(scopeCondos().map(c=>c.id));return ALERTS.filter(a=>ids.has(a.condo)&&(!r.company||a.company===r.company));}
+function svcList(c){const r=ROLES[state.role];return Object.entries(c.svc).filter(([id])=>!r.company||id===r.company);}
+
+/* ---------- navegação ---------- */
+function renderNav(){
+  const r = ROLES[state.role];
+  const open = scopeAlerts().filter(a=>a.status!=='encerrado').length;
+  const item = k => `<button class="nav" data-go="${k}" ${state.view===k?'aria-current="page"':''}>${svgI(k)}<span>${NAV[k][0]}</span>${k==='alertas'&&open?`<span class="count">${open}</span>`:''}</button>`;
+  const prod = r.nav.filter(k=>NAV[k][1]==='prod'), pres = r.nav.filter(k=>NAV[k][1]==='pres');
+  $('#nav-prod').innerHTML = `<div class="eyebrow">Produto</div>` + prod.map(item).join('');
+  $('#nav-pres').innerHTML = pres.length ? `<div class="eyebrow">Apresentação</div>` + pres.map(item).join('') : '';
+  $('#nav-pres').hidden = !pres.length;
+  const sub = {diretor:'4 empresas · 18 condomínios',gerente:'Fortslimp · 9 condomínios',supervisor:'Infraseg · rota de 7 condomínios',sindico:'Portal do cliente · Res. Ipê Amarelo',colaborador:'Portaria · Res. Ipê Amarelo',morador:'App do morador · 1204 B',plataforma:'Plataforma 4Traders'};
+  $('#tb-sub').textContent = sub[state.role];
+}
+function go(view,push=true){
+  const r = ROLES[state.role];
+  if(!r.nav.includes(view)) view = r.home;
+  state.view = view;
+  if(push){ try{ history.replaceState(null,'','#'+view); }catch(e){} }
+  renderNav(); render();
+  const v = $('#view'); v.scrollTop = 0; window.scrollTo({top:0});
+}
+document.addEventListener('click',e=>{
+  const g = e.target.closest('[data-go]'); if(g){ go(g.dataset.go); return; }
+});
+$('#role').addEventListener('change',e=>{ state.role=e.target.value; go(ROLES[state.role].home); toast('Agora você vê o sistema como: '+ROLES[state.role].label); });
+
+/* ---------- componentes ---------- */
+function scopeNote(){const s=ROLES[state.role].scope;return s?`<div class="scope"><b style="white-space:nowrap">Escopo do perfil</b><span>${s}</span></div>`:'';}
+function sparkline(values,co){
+  const w=240,h=52,pad=4,lab=34,min=Math.min(...values)-2,max=Math.max(...values)+1;
+  const x=i=>pad+i*(w-pad*2-lab)/(values.length-1), y=v=>h-6-(v-min)/(max-min)*(h-14);
+  const pts=values.map((v,i)=>[x(i),y(v)]);
+  const line=pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=`M${pts[0][0]},${h-3} L`+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L')+` L${pts[pts.length-1][0]},${h-3} Z`;
+  const L=pts[pts.length-1];
+  return `<svg class="spark ${co.cls}" viewBox="0 0 ${w} ${h}" data-spark="${values.join(',')}" data-name="${co.name}" role="img" aria-label="Cumprimento dos últimos 14 dias da ${co.name}, hoje ${values[values.length-1]}%">
+    <line x1="${pad}" x2="${w-lab}" y1="${y(90).toFixed(1)}" y2="${y(90).toFixed(1)}" stroke="var(--line)" stroke-dasharray="3 3"/>
+    <path d="${area}" fill="var(--cc)" fill-opacity=".12"/>
+    <polyline points="${line}" fill="none" stroke="var(--cc)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${L[0].toFixed(1)}" cy="${L[1].toFixed(1)}" r="3.5" fill="var(--cc)" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${(L[0]+7).toFixed(1)}" y="${(L[1]+4).toFixed(1)}">${values[values.length-1]}%</text></svg>`;
+}
+const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+function statusPill(st){return {ok:'<span class="pill s-ok">✓ Coberto</span>',warn:'<span class="pill s-warn">! Sem sinal</span>',crit:'<span class="pill s-crit">✕ Descoberto</span>',idle:'<span class="pill s-idle">– Fora de turno</span>'}[st];}
+function stIcon(st){return {ok:'✓',warn:'!',crit:'✕',idle:'–'}[st];}
+function stLabel(st){return {ok:'coberto',warn:'sem sinal',crit:'descoberto',idle:'fora de turno'}[st];}
+function fmtMin(m){return m<1?'agora':m<60?m+' min':m<1440?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):Math.floor(m/1440)+' d';}
+
+/* ---------- VISÃO ---------- */
+function vVisao(){
+  const r=ROLES[state.role], condos=scopeCondos(), postos=scopePostos(), alerts=scopeAlerts().filter(a=>a.status!=='encerrado');
+  let tasks=0,done=0,missed=0,colab=0,contracts=0;
+  condos.forEach(c=>svcList(c).forEach(([,s])=>{tasks+=s.tasks;done+=s.done;missed+=s.missed;colab+=s.colab;contracts++;}));
+  const active=postos.filter(p=>p.status!=='idle'), covered=active.filter(p=>p.status==='ok').length;
+  const crit=alerts.filter(a=>a.sev==='crit').length;
+  const title = state.role==='diretor'?'Visão do grupo':state.role==='gerente'?'Visão da Fortslimp':'Sua rota hoje';
+  const now = new Date();
+  const when = now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' · '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const opp = state.role==='diretor' ? CONDOS.length*4 - CONDOS.reduce((a,c)=>a+Object.keys(c.svc).length,0) : null;
+  const kpis = [
+    `<div class="kpi"><span class="eyebrow">Postos agora</span><span class="v">${covered}<small>/${active.length}</small></span><span class="d">${active.length-covered?`<b style="color:var(--crit)">${active.length-covered} com problema</b>`:'todos cobertos'} · ${postos.length-active.length} fora de turno</span></div>`,
+    `<div class="kpi"><span class="eyebrow">Cumprimento do dia</span><span class="v">${pct(done,tasks)}<small>%</small></span><span class="d"><span class="num">${fmt(done)}</span> de <span class="num">${fmt(tasks)}</span> tarefas · <span class="num">${missed}</span> não realizadas</span></div>`,
+    `<div class="kpi ${crit?'alert':''}"><span class="eyebrow">Alertas abertos</span><span class="v">${alerts.length}</span><span class="d">${crit} crítico${crit===1?'':'s'} · prazo de resposta em contagem</span></div>`,
+    `<div class="kpi"><span class="eyebrow">Equipe em escala</span><span class="v">${fmt(colab)}</span><span class="d">colaboradores em ${contracts} contratos ativos</span></div>`,
+    opp!==null?`<div class="kpi"><span class="eyebrow">Venda cruzada</span><span class="v">${opp}</span><span class="d">serviços do grupo ainda não contratados nos 18 condomínios</span></div>`:
+      `<div class="kpi"><span class="eyebrow">Condomínios no escopo</span><span class="v">${condos.length}</span><span class="d">${r.company?CO[r.company].name:''}</span></div>`
+  ].join('');
+  const cards = scopeCompanies().map(co=>{
+    const cs=condos.filter(c=>c.svc[co.id]); let t=0,d=0,p=0,a=0;
+    cs.forEach(c=>{const s=c.svc[co.id];t+=s.tasks;d+=s.done;p+=s.postos;});
+    a=alerts.filter(x=>x.company===co.id).length;
+    return `<article class="co ${co.cls}"><div class="co-h"><span class="dot"></span><div><b>${co.name}</b><br><span>${co.tag}</span></div></div>
+      <div class="co-stats"><div><b>${cs.length}</b><span>condomínios</span></div><div><b>${p}</b><span>postos</span></div><div><b style="${a?'color:var(--crit)':''}">${a}</b><span>alertas</span></div></div>
+      <div><div class="eyebrow" style="margin-bottom:2px">Cumprimento · 14 dias</div>${sparkline(TREND[co.id],co)}</div></article>`;
+  }).join('');
+  const board = condos.map(c=>{
+    const ps=postos.filter(p=>p.condo===c.id);
+    return `<div class="brow"><span class="n" title="${esc(c.name)}">${esc(c.name.replace(/^(Residencial|Condomínio|Edifício) /,''))}</span><span class="pps">${ps.map(p=>`<span class="pp s-${p.status}" data-tip="${esc(CO[p.company].name+' · '+p.desc+' · posto '+p.idx+' · '+stLabel(p.status))}"><span class="dot ${CO[p.company].cls}"></span>${stIcon(p.status)}</span>`).join('')}</span></div>`;
+  }).join('');
+  const low = [];
+  condos.forEach(c=>svcList(c).forEach(([id,s])=>low.push({c,id,s})));
+  low.sort((a,b)=>a.s.ipo-b.s.ipo);
+  return `${scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">${when}</div><h1>${title}</h1></div>
+    <p class="muted small">Tudo o que as ${scopeCompanies().length>1?'quatro empresas entregam':'equipes entregam'} hoje, num só lugar. Passe o mouse nos postos e nas linhas para ver detalhes.</p></div>
+  <section class="grid kpis" aria-label="Indicadores">${kpis}</section>
+  <section class="grid companies ${scopeCompanies().length>1?'':'single'}" aria-label="Empresas">${cards}</section>
+  ${(state.role==='diretor'||state.role==='supervisor')?portariaHoje():''}
+  <section class="grid cols-2">
+    <div class="panel"><div class="panel-h"><h2>Postos agora</h2>
+      <div class="legend"><span><span class="pill s-ok">✓</span>Coberto</span><span><span class="pill s-warn">!</span>Sem sinal</span><span><span class="pill s-crit">✕</span>Descoberto</span><span><span class="pill s-idle">–</span>Fora de turno</span></div></div>
+      <div class="board">${board}</div>
+      <p class="small muted" style="margin-top:10px">Cor do ponto = empresa. O app do posto envia sinal a cada 5 minutos; sem sinal por 15 minutos vira alerta automático.</p></div>
+    <div class="panel"><div class="panel-h"><h2>Alertas abertos</h2><button class="btn" data-go="alertas">Abrir central</button></div>
+      <div class="alerts">${alerts.slice().sort((a,b)=>['crit','high','med','low'].indexOf(a.sev)-['crit','high','med','low'].indexOf(b.sev)).slice(0,4).map(a=>miniAlert(a)).join('')}</div></div>
+  </section>
+  <section class="panel"><div class="panel-h"><h2>Onde olhar primeiro</h2><span class="small muted">Menor índice de performance operacional (IPO) do mês</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Condomínio</th><th>Empresa</th><th>Serviço</th><th class="c">IPO</th><th class="c">Tarefas hoje</th><th class="c">Não realizadas</th></tr></thead><tbody>
+    ${low.slice(0,6).map(({c,id,s})=>`<tr><td>${esc(c.name)}</td><td><span class="dot ${CO[id].cls}"></span> ${CO[id].name}</td><td class="muted">${s.desc}</td><td class="c num ${s.ipo<85?'ipo-low':''}">${s.ipo}%</td><td class="c num">${s.done}/${s.tasks}</td><td class="c num">${s.missed}</td></tr>`).join('')}
+    </tbody></table></div></section>`;
+}
+function portariaHoje(){
+  const cs=pkScope(), nav=ROLES[state.role].nav, sum=k=>cs.reduce((a,c)=>a+c.pk[k],0), visit=cs.reduce((a,c)=>a+c.acc.visit,0), auto=Math.round(cs.reduce((a,c)=>a+c.acc.auto,0)/cs.length);
+  return `<section class="panel"><div class="panel-h"><h2>Portaria hoje</h2><span class="small muted">encomendas, acessos e comunicados</span></div><div class="mini-kpis">
+  <button data-go="encomendas"><b>${sum('recv')}</b><span>encomendas recebidas</span></button><button data-go="encomendas"><b>${sum('wait')}</b><span>aguardando retirada</span></button>
+  <button data-go="acesso"><b>${visit}</b><span>visitantes no condomínio agora</span></button><button data-go="acesso"><b>${auto}%</b><span>entradas sem o porteiro digitar</span></button>
+  ${nav.includes('notificacoes')?`<button data-go="notificacoes"><b>${QUEUE.length}</b><span>comunicados agendados</span></button>`:''}</div></section>`;
+}
+function miniAlert(a){
+  const s=SEV[a.sev], c=CD[a.condo];
+  return `<div class="al ${s[2]}"><div class="stripe"></div><div class="body"><span class="t">${a.t}</span><span class="meta"><span class="pill ${s[1]}">${s[0]}</span><span>${esc(c.name)}</span><span style="white-space:nowrap"><span class="dot ${CO[a.company].cls}"></span> ${CO[a.company].name}</span><span>há ${fmtMin(a.open)}</span></span></div><div></div></div>`;
+}
+
+/* ---------- CONDOMÍNIOS ---------- */
+function vCondominios(){
+  const r=ROLES[state.role], condos=scopeCondos(), cos=scopeCompanies();
+  const total=condos.length*cos.length, active=condos.reduce((a,c)=>a+cos.filter(co=>c.svc[co.id]).length,0);
+  const rows = condos.slice().sort((a,b)=>Object.keys(b.svc).length-Object.keys(a.svc).length).map(c=>`<tr>
+    <td><b>${esc(c.name)}</b><br><span class="small muted">${c.kind} · ${c.size} ${c.kind==='Comercial'?'salas':'unidades'}</span></td>
+    ${cos.map(co=>{const s=c.svc[co.id];return `<td class="c">${s?`<span class="cell ${co.cls}" data-tip="${esc(co.name+' · '+s.desc+' · '+s.postos+' posto(s) · '+s.colab+' colaboradores · IPO '+s.ipo+'%')}"><span class="dot"></span>${s.ipo}%</span>`:(state.role==='diretor'?`<span class="cell opp" data-tip="${esc(co.name+' ainda não atende este condomínio')}">+ oportunidade</span>`:'')}</td>`;}).join('')}
+    <td class="c num">${svcList(c).reduce((a,[,s])=>a+s.postos,0)}</td></tr>`).join('');
+  return `${scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">Carteira de clientes</div><h1>Condomínios × serviços do grupo</h1></div>
+  ${state.role==='diretor'?`<div class="factrow"><div><b class="num">${active}</b><span>contratos ativos</span></div><div><b class="num">${total}</b><span>combinações possíveis</span></div><div><b class="num" style="color:var(--crit)">${total-active}</b><span>oportunidades de venda cruzada</span></div></div>`:''}</div>
+  ${state.role==='diretor'?`<p class="muted" style="max-width:75ch">Cada linha é um cliente; cada coluna, uma empresa do grupo. Célula preenchida mostra o índice de performance do mês. Célula tracejada é um serviço que o grupo pode oferecer ao mesmo síndico, já com histórico de entrega para mostrar.</p>`:''}
+  <div class="tbl-wrap"><table><thead><tr><th>Condomínio</th>${cos.map(co=>`<th class="c"><span class="dot ${co.cls}"></span> ${co.name}<br><span style="text-transform:none;letter-spacing:0;font-weight:500">${co.short}</span></th>`).join('')}<th class="c">Postos</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---------- ALERTAS ---------- */
+function alertStatus(a){return state.alertState[a.id]||a.status;}
+function vAlertas(){
+  const list = scopeAlerts();
+  const f = state.alertFilter;
+  const shown = list.filter(a=>f==='todos'||(f==='criticos'&&(a.sev==='crit'||a.sev==='high'))||(f==='abertos'&&alertStatus(a)==='novo')||(f==='assumidos'&&['assumido','escalado'].includes(alertStatus(a)))).sort((a,b)=>['crit','high','med','low'].indexOf(a.sev)-['crit','high','med','low'].indexOf(b.sev));
+  const card = a => {
+    const s=SEV[a.sev], c=CD[a.condo], st=alertStatus(a), ratio=clamp(a.open/a.sla,0,1), over=a.open>a.sla;
+    const stPill = st==='novo'?'<span class="pill s-crit">Aguardando aceite</span>':st==='assumido'?`<span class="pill s-info">Assumido · ${esc(a.who||'você')}</span>`:st==='escalado'?`<span class="pill s-warn">Escalonado · ${esc(a.who)}</span>`:'<span class="pill s-ok">✓ Encerrado com evidência</span>';
+    return `<article class="al ${s[2]}"><div class="stripe"></div><div class="body">
+      <span class="meta"><span class="pill ${s[1]}">${s[0]}</span>${stPill}</span>
+      <span class="t">${a.t} · ${esc(c.name)}</span>
+      <span class="meta"><span><span class="dot ${CO[a.company].cls}"></span> ${CO[a.company].name}</span><span>${a.d}</span></span>
+      <span class="meta"><span class="num">Aberto há ${fmtMin(a.open)} · prazo de resposta ${fmtMin(a.sla)}</span>${over&&st!=='encerrado'?'<b style="color:var(--crit)">prazo estourado</b>':''}</span>
+      <div class="sla" aria-hidden="true"><i style="width:${(ratio*100).toFixed(0)}%"></i></div>
+      <div class="chain">${CHAIN.map((x,i)=>`<span class="${i+1<a.step?'done':i+1===a.step?'now':''}">${x}</span>${i<CHAIN.length-1?'<em>→</em>':''}`).join('')}</div>
+    </div><div class="acts">${st==='encerrado'?'':`${st==='novo'?`<button class="btn primary" data-act="assumir" data-id="${a.id}">Assumir</button>`:''}<button class="btn" data-act="escalar" data-id="${a.id}">Escalonar</button><button class="btn" data-act="encerrar" data-id="${a.id}">Encerrar com evidência</button>`}</div></article>`;
+  };
+  const btn=(k,l)=>`<button class="fbtn" data-filter="${k}" aria-pressed="${f===k}">${l}</button>`;
+  return `${scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">Resposta a desvios</div><h1>Central de alertas</h1></div>
+  <p class="muted small">Cada alerta tem dono, prazo e trilha. Sem aceite no prazo, o sistema sobe um degrau: push → supervisor → WhatsApp → ligação automática → coordenador.</p></div>
+  <div class="filters">${btn('todos','Todos ('+list.length+')')}${btn('criticos','Crítico e alto')}${btn('abertos','Aguardando aceite')}${btn('assumidos','Assumidos')}</div>
+  <section class="alerts">${shown.map(card).join('')||'<p class="muted">Nenhum alerta neste filtro.</p>'}</section>`;
+}
+document.addEventListener('click',e=>{
+  const fb=e.target.closest('[data-filter]'); if(fb){state.alertFilter=fb.dataset.filter;render();return;}
+  const ab=e.target.closest('[data-act]'); if(ab){
+    const a=ALERTS.find(x=>x.id===+ab.dataset.id), act=ab.dataset.act;
+    if(act==='assumir'){state.alertState[a.id]='assumido';a.who='você';toast('Alerta assumido. O cronômetro de resolução começou.');}
+    if(act==='escalar'){state.alertState[a.id]='escalado';a.step=Math.min(CHAIN.length,a.step+1);a.who=CHAIN[a.step-1];toast('Escalonado para: '+CHAIN[a.step-1]+'.');}
+    if(act==='encerrar'){state.alertState[a.id]='encerrado';toast('No produto, encerrar pede foto ou relato. Fica tudo no histórico do condomínio.');}
+    renderNav();render();
+  }
+});
+
+/* ---------- PORTAL DO SÍNDICO ---------- */
+function vPortal(){
+  const c=CD.c1, pre = state.role!=='sindico';
+  const rows = Object.entries(c.svc).map(([id,s])=>{
+    const line = {infraseg:`Portaria: ${s.postos} postos cobertos · rondas ${7}/8 · 3 encomendas aguardando`,
+      fortslimp:`Limpeza: ${s.done} de ${s.tasks} tarefas do roteiro · próxima: garagem às 16:00`,
+      fortsbravo:`Brigada: inspeção diária concluída · extintores e hidrantes em dia`,
+      fortservice:`Manutenção: 1 chamado aberto (portão da garagem) · 2 preventivas no mês`}[id];
+    return `<div class="svc-row"><div><span class="dot ${CO[id].cls}"></span> <b>${CO[id].name}</b> <span class="small muted">· ${CO[id].short}</span><br><span class="small">${line}</span></div>${statusPill(id==='fortservice'?'warn':'ok').replace('Sem sinal','Em atendimento')}</div>`;
+  }).join('');
+  return `${pre?`<div class="scope"><b style="white-space:nowrap">Prévia</b><span>É isto que o síndico vê no celular ou no computador, com a marca do grupo. Um portal para todos os serviços que o grupo presta no condomínio.</span></div>`:''}
+  <div class="portal-h"><div><span>Portal do cliente · Grupo FortSvig</span><h2>${c.name}</h2><span>Síndico: Antônio Mendes · 240 unidades · 4 serviços contratados com o grupo</span></div>
+    <div style="text-align:right"><div class="big" style="color:#fff">96%</div><span>Índice de performance de setembro</span></div></div>
+  <section class="grid cols-2">
+    <div class="panel"><div class="panel-h"><h2>Hoje no seu condomínio</h2><span class="small muted">atualizado agora</span></div>${rows}</div>
+    <div class="panel"><div class="panel-h"><h2>Linha do tempo</h2></div><div class="tl">
+      <div><time>06:58</time><i class="c1"></i><span>Passagem de turno da portaria registrada · chaves e rádio conferidos</span></div>
+      <div><time>07:30</time><i class="c3"></i><span>Inspeção diária da brigada: 24 extintores, 6 hidrantes, central de alarme</span></div>
+      <div><time>09:12</time><i class="c2"></i><span>Hall e elevadores limpos · 4 fotos antes/depois</span></div>
+      <div><time>10:40</time><i class="c4"></i><span>Chamado aberto: portão da garagem lento · técnico agendado 14:00</span></div>
+      <div><time>11:05</time><i class="c1"></i><span>12 encomendas recebidas · moradores avisados por WhatsApp</span></div>
+      <div><time>14:02</time><i class="c1"></i><span>Ronda perimetral concluída · 8 de 8 pontos NFC</span></div>
+    </div></div>
+  </section>
+  <section class="grid cols-2e">
+    <div class="panel"><div class="panel-h"><h2>Documentos e prazos</h2></div><div class="docs">
+      <div><span>Relatório mensal · setembro/2026</span><span class="pill s-ok">Disponível</span></div>
+      <div><span>AVCB do condomínio</span><span class="num muted">válido até 03/2027</span></div>
+      <div><span>Atestado de brigada (IT 17)</span><span class="num muted">renovar até 11/2026</span></div>
+      <div><span>Limpeza da caixa d'água</span><span class="num muted">próxima 12/2026</span></div></div></div>
+    <div class="panel"><div class="panel-h"><h2>Ações</h2></div><div style="display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn primary" data-toast="No produto, o chamado vai direto para a empresa certa do grupo, com prazo e resposta registrados.">Abrir chamado</button>
+      <button class="btn" data-toast="No produto, o PDF sai assinado, com QR de verificação de autenticidade.">Baixar relatório do mês</button>
+      <button class="btn" data-toast="No produto, o síndico aprova orçamentos e ordens de serviço por aqui.">Aprovações pendentes (1)</button></div>
+      <p class="small muted" style="margin-top:12px">Moradores não precisam instalar nada: recebem aviso de encomenda e comunicados pelo WhatsApp, com link para retirada.</p></div>
+  </section>`;
+}
+
+/* ---------- APP ---------- */
+function phone(head,body,active,tabs){
+  return `<div class="phone"><div class="screen"><div class="sbar"><span>21:40</span><span>4G ▮▮▯</span></div>${head}<div class="abody">${body}</div>
+  <div class="tabbar">${(tabs||['Início','Tarefas','Ronda','Mais']).map(t=>t===active?`<b>${t}</b>`:`<span>${t}</span>`).join('')}</div></div></div>`;
+}
+function vApp(){
+  const head = `<div class="apphead"><b>Olá, Carlos</b><span>Porteiro · 12x36 noturno · Res. Ipê Amarelo · Portaria principal</span></div>`;
+  const p1 = phone(head,`
+    <div class="acard"><b>Turno iniciado às 19:02</b><span class="muted">Selfie + PIN confirmados · no posto (Wi-Fi do condomínio)</span></div>
+    <div class="acard"><b>Próxima ronda às 22:00</b><span class="muted">8 pontos NFC · leva cerca de 20 min</span></div>
+    <div class="acard"><b>Tarefas do turno · 5 de 9</b><div class="progress"><i style="width:55%"></i></div></div>
+    <div class="offline">Sem internet · 3 registros guardados, enviam sozinhos</div>
+    <div class="abtns"><div class="abtn">Ocorrência por voz</div><div class="abtn">Nova encomenda</div><div class="abtn sos">SOS · pedir ajuda</div></div>`,'Início');
+  const p2 = phone(`<div class="apphead"><b>Ronda perimetral · 22:00</b><span>Aproxime o celular de cada etiqueta</span></div>`,`
+    <div class="acard"><b>5 de 8 pontos</b><div class="progress"><i style="width:62%"></i></div><span class="muted">Iniciada 22:01 · ritmo normal</span></div>
+    ${[['Portão de veículos','22:02','ok'],['Casa de máquinas','22:05','ok'],['Piscina e deck','22:08','ok'],['Muro dos fundos','22:11','ok'],['Garagem G1','22:14','ok'],['Garagem G2','próximo','next'],['Gerador','','pend'],['Hall bloco B','','pend']].map(([n,t,s])=>`<div class="cp"><i class="${s}">${s==='ok'?'✓':s==='next'?'→':'·'}</i><span style="flex:1">${n}</span><span class="num muted">${t}</span></div>`).join('')}
+    <span class="small muted">Etiqueta NFC criptografada: não dá para copiar nem ler por foto.</span>`,'Ronda');
+  const p3 = phone(`<div class="apphead"><b>Nova ocorrência</b><span>Fale o que aconteceu; o sistema organiza</span></div>`,`
+    <div class="acard" style="align-items:center"><div class="wave">${[8,18,26,14,30,22,10,24,32,16,9,20,28,12,6].map(h=>`<i style="height:${h}px"></i>`).join('')}</div><span class="muted">00:21 · áudio original guardado</span></div>
+    <div class="acard"><b>Organizado automaticamente</b>
+      <div class="field-chip"><span>Tipo</span><b>Acesso indevido</b></div>
+      <div class="field-chip"><span>Local</span><b>Portão de veículos</b></div>
+      <div class="field-chip"><span>Prioridade</span><b style="color:var(--warn)">Média</b></div>
+      <div class="field-chip stack"><span>Resumo</span><b>Visitante tentou entrar atrás de morador; acesso negado, morador avisado.</b></div></div>
+    <div class="abtns"><div class="abtn">Adicionar foto</div><div class="abtn" style="background:#0E1B33;color:#fff;border-color:#0E1B33">Registrar</div></div>`,'Início');
+  return `${state.role==='colaborador'?'':`<div class="scope"><b style="white-space:nowrap">Prévia</b><span>App do colaborador no celular do posto. Funciona sem internet e sincroniza quando o sinal volta.</span></div>`}
+  <div class="pagehead"><div><div class="eyebrow">Celular do posto</div><h1>App do colaborador</h1></div>
+  <p class="muted small">Três modos no mesmo app: colaborador de posto, supervisor volante e portaria em tablet.</p></div>
+  <div class="phones"><div class="phone-wrap">${p1}<span class="small muted">Início do turno com selfie e PIN. Funciona offline.</span></div>
+  <div class="phone-wrap">${p2}<span class="small muted">Ronda por NFC com tempo entre pontos conferido.</span></div>
+  <div class="phone-wrap">${p3}<span class="small muted">Relato por voz vira ocorrência estruturada.</span></div></div>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>Colaborador de posto</h3><p class="small muted" style="margin-top:6px">Checklist do turno, ronda NFC, ocorrência por voz, encomendas com leitura da etiqueta, passagem de turno com chaves e equipamentos, SOS e procedimentos do posto.</p></div>
+    <div class="panel"><h3>Supervisor volante</h3><p class="small muted" style="margin-top:6px">Rota de visitas, checklist do posto (uniforme, postura, livro), assumir alertas, cobrir falta com folguista e aprovar justificativas.</p></div>
+  </section>`;
+}
+
+/* ---------- USUÁRIOS ---------- */
+const PERMS = [
+  ['Ver painel consolidado do grupo','y','n','n','n','p','n','n','n'],
+  ['Ver operação de todas as empresas','y','n','n','n','y','n','n','n'],
+  ['Convidar usuários e definir perfis','y','p','n','n','n','n','n','n'],
+  ['Configurar checklists, rondas e prazos','y','y','n','n','n','n','n','n'],
+  ['Assumir, escalonar e encerrar alertas','y','y','y','n','n','n','n','n'],
+  ['Enviar comunicados','y','p','p','n','p','n','p','n'],
+  ['Registrar e entregar encomendas','n','n','p','y','n','n','n','n'],
+  ['Liberar visitantes','n','n','p','y','n','n','n','p'],
+  ['Ver fotos e documentos de visitantes','n','n','p','p','n','n','n','n'],
+  ['Editar cadastro da unidade','n','n','n','n','n','n','n','p'],
+  ['Ver documentos pessoais dos colaboradores','y','p','n','n','y','n','n','n'],
+  ['Ver contratos, medição e financeiro','y','n','n','n','n','y','n','n'],
+  ['Exportar relatórios','y','y','p','n','p','y','y','n'],
+  ['Abrir chamados e aprovar orçamentos','n','n','n','n','n','n','y','p'],
+  ['Executar tarefas, rondas e ocorrências','n','n','p','y','n','n','n','n']
+];
+function vUsuarios(){
+  const isGer = state.role==='gerente';
+  const users = isGer ? USERS.filter(u=>u[2].includes('Fortslimp')||u[1]==='Colaborador de campo') : USERS;
+  const sym = {y:'<span class="y">✓</span>',p:'<span class="p">◐</span>',n:'<span class="n">—</span>'};
+  return `${scopeNote()}${isGer?`<div class="scope"><b style="white-space:nowrap">Escopo do perfil</b><span>Gerente vê a matriz e convida usuários só da própria empresa. Não pode criar diretores nem acessar outras empresas.</span></div>`:''}
+  <div class="pagehead"><div><div class="eyebrow">Quem vê o quê</div><h1>Usuários e permissões</h1></div>
+  <p class="muted small">Cada pessoa tem um perfil (o que pode fazer) e um escopo (onde pode fazer). Toda ação fica registrada.</p></div>
+  <section class="panel"><div class="panel-h"><h2>Hierarquia de acesso</h2></div>
+    <div class="hier"><div><b>Plataforma</b><span>4Traders</span></div><em>→</em><div><b>Grupo FortSvig</b><span>conta do cliente</span></div><em>→</em><div><b>Empresa</b><span>4 CNPJs</span></div><em>→</em><div><b>Cliente / contrato</b><span>síndico, empresa</span></div><em>→</em><div><b>Local</b><span>condomínio</span></div><em>→</em><div><b>Posto ou área</b><span>portaria, garagem</span></div><em>→</em><div><b>Colaborador</b><span>turno</span></div></div>
+    <div class="hier" style="margin-top:8px"><div><b>Local</b><span>condomínio</span></div><em>→</em><div><b>Unidade</b><span>apartamento ou sala</span></div><em>→</em><div><b>Morador</b><span>e autorizados</span></div><em>→</em><div><b>Visitante</b><span>convite temporário</span></div></div>
+    <p class="small muted" style="margin-top:10px">Um supervisor da Infraseg com escopo em 7 condomínios só enxerga esses 7, e só os serviços da Infraseg. O síndico enxerga o próprio condomínio com todos os serviços do grupo.</p></section>
+  <section><div class="panel-h"><h2>Matriz de permissões</h2><div class="legend"><span>${sym.y} permitido</span><span>${sym.p} só no próprio escopo</span><span>${sym.n} não permitido</span></div></div>
+  <div class="tbl-wrap"><table class="mx"><thead><tr><th>Permissão</th><th class="c">Diretor</th><th class="c">Gerente</th><th class="c">Supervisor</th><th class="c">Portaria</th><th class="c">RH / DP</th><th class="c">Financeiro</th><th class="c">Síndico</th><th class="c">Morador</th></tr></thead>
+  <tbody>${PERMS.map(p=>`<tr><td>${p[0]}</td>${p.slice(1).map(v=>`<td class="c">${sym[v]}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>
+  <section><div class="panel-h"><h2>Usuários</h2><button class="btn primary" data-toast="No produto, o convite vai por WhatsApp ou e-mail com o perfil e o escopo já definidos.">Convidar usuário</button></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Perfil</th><th>Escopo</th><th>Situação</th></tr></thead><tbody>
+  ${users.map(u=>`<tr><td><b>${u[0]}</b></td><td>${u[1]}</td><td class="muted">${u[2]}</td><td>${u[3].startsWith('Ativo')?`<span class="pill s-ok">${u[3]}</span>`:u[3]==='Auditado'?`<span class="pill s-info">${u[3]}</span>`:`<span class="pill s-idle">${u[3]}</span>`}</td></tr>`).join('')}
+  </tbody></table></div></section>
+  <section class="rules">
+    <div class="rule"><b>Demissão bloqueia na hora</b><span class="muted">Desligamento no RH (Protheus) revoga o acesso ao app automaticamente.</span></div>
+    <div class="rule"><b>Verificação em duas etapas</b><span class="muted">Obrigatória para diretoria, gerentes e financeiro.</span></div>
+    <div class="rule"><b>Nada é apagado</b><span class="muted">Correções ficam como nova versão, com quem alterou, quando e por quê.</span></div>
+    <div class="rule"><b>Morador com ou sem app</b><span class="muted">Quem não instala recebe WhatsApp com link. Cada morador só vê a própria unidade.</span></div>
+    <div class="rule"><b>Biometria opcional</b><span class="muted">Facial só com consentimento e sempre com alternativa: QR, tag ou senha.</span></div>
+    <div class="rule"><b>Diretoria não vê rosto de visitante</b><span class="muted">Fotos e documentos ficam com a portaria e a supervisão do condomínio, pelo prazo definido.</span></div>
+  </section>`;
+}
+
+/* ---------- MASTER ---------- */
+function vMaster(){
+  const mods=[['Cobertura de postos','Ativo'],['Ronda NFC','Ativo'],['Ocorrências e alertas','Ativo'],['Central de notificações','Ativo'],['Portal do síndico','Ativo'],['Encomendas com retirada digital','Ativo'],['App do morador','Ativo'],['Controle de acesso: placa e facial','Fase 2'],['Manutenção e ativos','Fase 2'],['Glosa / IMR','Fase 2'],['IA de previsão de faltas','Fase 3']];
+  return `${scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">4Traders</div><h1>Master da plataforma</h1></div><p class="muted small">Onde a plataforma é operada: contas de clientes, módulos contratados, consumo e saúde dos aparelhos em campo.</p></div>
+  <section class="grid kpis">
+    <div class="kpi"><span class="eyebrow">Contas ativas</span><span class="v">1</span><span class="d">Grupo FortSvig · 4 empresas</span></div>
+    <div class="kpi"><span class="eyebrow">Locais</span><span class="v">18</span><span class="d">${POSTOS.length} postos cadastrados</span></div>
+    <div class="kpi"><span class="eyebrow">Entrega de push · 24h</span><span class="v">99,2<small>%</small></span><span class="d">aceite medido dentro do app</span></div>
+    <div class="kpi"><span class="eyebrow">Aparelhos com fila</span><span class="v">3</span><span class="d">aguardando sinal para sincronizar</span></div>
+    <div class="kpi"><span class="eyebrow">WhatsApp no mês</span><span class="v">4.812</span><span class="d">franquia do plano: 6.000</span></div>
+  </section>
+  <section class="grid cols-2e">
+    <div class="panel"><div class="panel-h"><h2>Módulos · Grupo FortSvig</h2></div><div class="docs">${mods.map(m=>`<div><span>${m[0]}</span>${m[1]==='Ativo'?'<span class="pill s-ok">✓ Ativo</span>':`<span class="pill s-idle">${m[1]}</span>`}</div>`).join('')}</div></div>
+    <div class="panel"><div class="panel-h"><h2>Saúde e auditoria</h2></div><div class="docs">
+      <div><span>Versão do app em campo</span><span class="num muted">1.4.2 em 92% · 1.4.1 em 8%</span></div>
+      <div><span>Última cópia de segurança</span><span class="num muted">hoje 03:00 · região São Paulo</span></div>
+      <div><span>Fotos e evidências armazenadas</span><span class="num muted">38 GB</span></div>
+      <div><span>Acesso do suporte ao grupo</span><span class="num muted">chamado #112 · autorizado pela diretoria</span></div>
+      <div><span>Isolamento entre contas</span><span class="pill s-ok">✓ testes automáticos</span></div></div></div>
+  </section>`;
+}
+
+/* ---------- ESTUDO ---------- */
+const STUDY = {
+ infraseg:{lines:['Portaria presencial 24h','Controlador de acesso','Recepção','Ronda não armada (confirmar)','Monitoramento 24h e portaria remota (o site do grupo oferece; confirmar qual empresa opera)'],
+  roles:['Porteiro','Controlador de acesso','Folguista','Operador de central','Supervisor volante'],
+  routine:['Troca de turno: livro, chaves, rádio, câmeras','Conferência de portões e eclusas','Controle de veículos, pedestres e prestadores','Recebimento e entrega de encomendas','Ronda com pontos NFC','Passagem de turno com pendências'],
+  rules:['Convenção coletiva da categoria (escala 12x36, intervalos)','LGPD: dados de visitantes e leitor facial (biometria é dado sensível)','Lei 14.967/2024 e Decreto 13.012/2026: monitoramento eletrônico passa a exigir autorização da PF e CNPJ com objeto exclusivo (CNAE 8020-0/01)','Portaria não é vigilância: controlador de acesso não faz segurança armada'],
+  kpis:['% de postos cobertos por turno','Tempo para cobrir uma falta','Rondas completas no horário','Ocorrências por posto','Encomendas retiradas em até 48h','Tempo de resposta a alertas'],
+  pains:['Falta sem aviso deixa a portaria vazia','Ronda registrada sem ter sido feita (QR fotografado)','Livro de ocorrências em papel, ilegível e perdível','Morador reclama de encomenda extraviada','Síndico não vê o que acontece à noite'],
+  mods:['Cobertura de postos e folguistas','Ronda NFC antifraude','Ocorrência por voz','Encomendas com leitura de etiqueta e retirada digital','Controle de acesso: convite QR, foto e documento, placa e facial','App do morador e modo portaria em tablet','Central de alertas e de notificações'],
+  ask:['Qual CNPJ opera o monitoramento 24h e a portaria remota?','Há vigilância patrimonial autorizada pela PF no grupo?','A plataforma de R$ 900 por condomínio é a da portaria remota/controle de acesso ou um app de gestão?','Os porteiros usam celular pessoal ou do posto?']},
+ fortslimp:{lines:['Limpeza de áreas comuns','Conservação','Higienização de sanitários','Coleta e separação de resíduos','Vidros e fachada (trabalho em altura)'],
+  roles:['Auxiliar de serviços gerais (ASG)','Encarregado(a)','Líder volante'],
+  routine:['Roteiro por área e horário: hall, elevadores, garagem, salão','Reposição de insumos','Coleta seletiva','Foto antes e depois nas áreas críticas','Auditoria de qualidade pelo encarregado'],
+  rules:['NR-1: gerenciamento de riscos (PGR)','NR-6: EPI com ficha de entrega assinada','Fichas de dados de segurança dos produtos químicos (ABNT NBR 14725)','NR-35 quando houver trabalho em altura','Convenção coletiva de limpeza e conservação'],
+  kpis:['% do roteiro cumprido','Nota de auditoria por área','Consumo de insumos por condomínio','Reclamações por mês','Absenteísmo'],
+  pains:['Síndico diz que não limparam e não há prova','Consumo de material sem controle vira custo','Falta de ASG sem reposição','Entrega de EPI sem registro gera passivo trabalhista'],
+  mods:['Checklist por área com foto antes/depois','Etiqueta por ambiente','Estoque de insumos por condomínio','Auditoria de qualidade (supervisor e síndico)','Entrega de EPI com assinatura no app'],
+  ask:['Atende só condomínios ou também empresas e órgãos públicos?','Controla hoje o consumo de insumos por cliente?','Quem audita a qualidade e com que frequência?','Faz limpeza de fachada ou vidros em altura?']},
+ fortsbravo:{lines:['Bombeiro civil em posto fixo (24h ou diurno)','Inspeção de equipamentos de incêndio','Exercícios simulados','Formação e reciclagem de brigada (confirmar)','Apoio a eventos'],
+  roles:['Bombeiro civil','Bombeiro civil líder','Supervisor técnico'],
+  routine:['Inspeção de extintores, hidrantes e mangotinhos','Iluminação de emergência e central de alarme','Rotas de fuga e portas corta-fogo','Ronda preventiva','Registro de anormalidades','Simulado com ata'],
+  rules:['Lei 11.901/2009 (profissão de bombeiro civil)','IT 17 do Corpo de Bombeiros de SP: reciclagem da brigada a cada 12 meses','IT 17: atestado de brigada renovado há no máximo 12 meses é exigido na vistoria','IT 17: simulado no mínimo a cada 12 meses, com ata','AVCB do condomínio em dia'],
+  kpis:['% de equipamentos inspecionados no mês','Itens vencidos','Dias até o vencimento do AVCB','Bombeiros com reciclagem válida','Simulados realizados','Tempo de resposta a ocorrência'],
+  pains:['Extintor vencido descoberto na vistoria','AVCB atrasado trava o condomínio','Certificados de reciclagem espalhados em pastas','Inspeção marcada no papel sem ter sido feita'],
+  mods:['Cadastro de equipamentos com etiqueta e histórico','Calendário de vencimentos','Controle de certificados com aviso 60/30/15 dias','Simulado com ata digital','Relatório técnico mensal ao síndico'],
+  ask:['Atua só com posto fixo ou também forma brigadas dos condomínios?','A recarga de extintores é própria ou terceirizada?','Quantos condomínios têm AVCB vencendo nos próximos 6 meses?','Quantos bombeiros civis no quadro?']},
+ fortservice:{lines:['Manutenção predial e zeladoria técnica (confirmar)','Pequenos reparos elétricos e hidráulicos','Jardinagem e piscina (confirmar)','Prevenção de perdas (o site do grupo oferece)','Apoio a laudos e preventivas'],
+  roles:['Zelador','Oficial de manutenção','Eletricista','Jardineiro / piscineiro','Fiscal de prevenção de perdas'],
+  routine:['Plano preventivo: bombas, portões, iluminação, reservatórios','Ordens de serviço com foto','Limpeza de caixa d’água','Controle de piscina','Agenda de laudos do condomínio'],
+  rules:['ABNT NBR 5674: plano de manutenção da edificação','NR-10 para serviços em eletricidade','NR-35 para trabalho em altura','NR-33 para espaço confinado (reservatórios)','Laudos do condomínio: para-raios, elevadores, AVCB'],
+  kpis:['Preventivas feitas no prazo','Ordens de serviço abertas e fechadas','Tempo médio de atendimento','Reincidência por equipamento','Custo de manutenção por condomínio'],
+  pains:['Manutenção só corretiva, sempre em emergência','Chamado do síndico pelo WhatsApp se perde','Sem histórico do equipamento','Prazo de laudo esquecido'],
+  mods:['Ordens de serviço com prazo','Plano preventivo por equipamento','Histórico por QR no equipamento','Chamados do síndico pelo portal','Agenda de laudos'],
+  ask:['Quais serviços a Fortservice presta exatamente?','Tem técnicos com NR-10 e NR-35?','Atende clientes fora dos condomínios?','Faz o plano de manutenção (NBR 5674) para os síndicos?']}
+};
+function vEstudo(){
+  const t=state.studyTab, co=CO[t], s=STUDY[t];
+  const cs=CONDOS.filter(c=>c.svc[t]); const postos=cs.reduce((a,c)=>a+c.svc[t].postos,0), colab=cs.reduce((a,c)=>a+c.svc[t].colab,0);
+  const list = arr => `<ul>${arr.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  return `<div class="pagehead"><div><div class="eyebrow">Estudo individual</div><h1>As quatro empresas do grupo</h1></div>
+  <p class="muted small">Montado a partir do projeto Smart One, do site do grupo e das normas de cada serviço. O que está marcado para confirmar fecha na reunião.</p></div>
+  <div class="tabs" role="tablist">${COMPANIES.map(c=>`<button class="tab ${c.cls}" role="tab" aria-selected="${c.id===t}" data-study="${c.id}"><span class="dot"></span><div><b>${c.name}</b><span>${c.tag}</span></div></button>`).join('')}</div>
+  <section class="panel ${co.cls}" style="border-top:3px solid var(--cc)"><div class="panel-h"><div><h2>${co.name}</h2><span class="muted">${co.tag}</span></div>
+    <div class="factrow"><div><b>${cs.length}</b><span>condomínios</span></div><div><b>${postos}</b><span>postos</span></div><div><b>${colab}</b><span>colaboradores</span></div><div><b>${Math.round(cs.reduce((a,c)=>a+c.svc[t].ipo,0)/cs.length)}%</b><span>IPO médio</span></div></div></div>
+    <div class="tagline">${s.lines.map(l=>`<span class="chip">${l}</span>`).join('')}</div>
+    <p class="small muted" style="margin-top:8px">Números ilustrativos do protótipo. Na versão real, vêm do cadastro.</p></section>
+  <section class="study">
+    <div class="panel"><h3>Funções em campo</h3>${list(s.roles)}</div>
+    <div class="panel"><h3>Rotinas que viram checklist</h3>${list(s.routine)}</div>
+    <div class="panel"><h3>Normas e documentos que o sistema controla</h3>${list(s.rules)}</div>
+    <div class="panel"><h3>Indicadores no painel</h3>${list(s.kpis)}</div>
+    <div class="panel"><h3>Dores que o sistema resolve</h3>${list(s.pains)}</div>
+    <div class="panel"><h3>Módulos da plataforma</h3>${list(s.mods)}</div>
+    <div class="panel ask"><h3>Confirmar na reunião</h3>${list(s.ask)}</div>
+  </section>
+  <section class="panel"><div class="panel-h"><h2>O que só o grupo tem</h2></div>
+    <p style="max-width:80ch">Em 5 dos 18 condomínios, três ou mais empresas do grupo trabalham no mesmo prédio. Hoje cada serviço presta contas separado. Com uma plataforma única, o síndico recebe um portal e um relatório com portaria, limpeza, brigada e manutenção juntos, e o grupo enxerga onde oferecer o serviço que falta.</p></section>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-study]');if(b){state.studyTab=b.dataset.study;render();}});
+
+/* ---------- PLANO ---------- */
+function vPlano(){
+  const P=[
+    ['Semanas 1–2','Diagnóstico',['Lista dos 18 condomínios com unidades, serviços, postos e escalas de cada empresa','Marcas das câmeras de placa, terminais faciais e cancelas já instalados','Mapa da plataforma atual: o que faz, quem usa, prazo e multa do contrato','Uma conversa de 1h com o gestor de cada empresa','Integrações: Protheus (RH, folha, faturamento) e sistema de ponto'],'Mapa operacional do grupo e escopo da primeira versão fechado',true],
+    ['Semanas 2–3','Contrato e desenho',['Escopo, cronograma e pagamento por etapa','Telas aprovadas com base neste protótipo','Perfis, permissões e regras de alerta definidos','Termos de proteção de dados (LGPD) assinados'],'Contrato assinado e telas aprovadas',false],
+    ['Semanas 3–14','Construção',null,'Primeira versão pronta para piloto',false],
+    ['Semanas 15–18','Piloto',['3 condomínios onde atuam 3 ou mais empresas do grupo','Celulares do posto, tablet da portaria e etiquetas NFC instalados','Moradores convidados para o app; quem não instalar recebe por WhatsApp','Treinamento em campo, por turno','Medir antes e depois: postos descobertos, tempo de resposta, reclamações'],'Relatório do piloto com números e ajustes',false],
+    ['Semanas 19–24','Migração',['Ondas de 5 condomínios','Plataforma atual desligada só depois da última onda, respeitando o aviso prévio do contrato','Síndicos recebem acesso ao novo portal'],'18 condomínios na nova plataforma',false],
+    ['Contínuo','Evolução',['Integração com Protheus','Manutenção preventiva e equipamentos','Glosa e medição em contratos públicos (IMR)','Previsão de faltas com IA','Abertura da plataforma para outras empresas do setor'],'Novos módulos a cada mês',false]
+  ];
+  const sprints=[['Sprint 1','Base: grupo, empresas, condomínios, unidades, postos, usuários e permissões'],['Sprint 2','App do colaborador: turno, checklist, ronda NFC, voz, offline'],['Sprint 3','Alertas, escalonamento e central de notificações com agendamento'],['Sprint 4','Encomendas com retirada digital e app do morador'],['Sprint 5','Controle de acesso: visitantes com foto e documento, liberação pelo app, placa e facial'],['Sprint 6','Painel do grupo, portal do síndico, relatórios e ajustes']];
+  return `<div class="pagehead"><div><div class="eyebrow">Do acordo ao uso diário</div><h1>Plano passo a passo</h1></div>
+  <p class="muted small">Estimativa para a primeira versão. O prazo final depende do escopo fechado no diagnóstico.</p></div>
+  <section class="phases">${P.map(p=>`<div class="ph ${p[4]?'now':''}"><div class="when">${p[0]}</div><div class="node"><i></i></div><div class="card"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3>${p[1]}</h3><span class="num small muted">${p[0]}</span></div>
+    ${p[2]?`<ul>${p[2].map(x=>`<li>${x}</li>`).join('')}</ul>`:`<div class="sprints">${sprints.map(s=>`<div><b>${s[0]}</b>${s[1]}</div>`).join('')}</div>`}
+    <div class="deliv"><b>Entrega:</b> ${p[3]}</div></div></div>`).join('')}</section>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>O que precisamos do grupo</h3><ul style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.9rem">
+      <li>Uma pessoa de referência na operação</li><li>Planilhas de condomínios, escalas e colaboradores</li><li>2h por semana de um gestor de cada empresa durante a construção</li><li>Celulares para os postos do piloto</li><li>Acesso de leitura ao Protheus para a integração</li></ul></div>
+    <div class="panel"><h3>Decisões para esta reunião</h3><ul style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:.9rem">
+      <li>Formato: contrato de desenvolvimento ou sociedade</li><li>Quais 3 condomínios entram no piloto</li><li>Data de início do diagnóstico</li><li>Prazo e aviso prévio da plataforma atual</li></ul></div>
+  </section>`;
+}
+
+/* ---------- ECONOMIA ---------- */
+const ECO={W:920,H:300,L:70,R:150};
+let eco = {n:18, atual:900, nova:450, impl:60000, overlap:1, h:24};
+function ecoCalc(){
+  const A=eco.n*eco.atual, N=eco.n*eco.nova, months=[];
+  let be=null;
+  for(let m=0;m<=eco.h;m++){
+    const cur=A*m, nw=eco.impl+N*m+A*Math.min(m,eco.overlap);
+    months.push({m,cur,nw});
+    if(be===null && m>0 && nw<=cur) be=m;
+  }
+  // ponto exato de equilíbrio
+  let exact=null; if(A-N>0){exact=(eco.impl+A*eco.overlap)/(A-N);}
+  return {A,N,months,be,exact,save:A-N};
+}
+function ecoChart(c){
+  const W=ECO.W,H=ECO.H,L=ECO.L,Rr=ECO.R,T=16,B=34,maxV=Math.max(...c.months.map(p=>Math.max(p.cur,p.nw)))*1.08;
+  const x=m=>L+m*(W-L-Rr)/eco.h, y=v=>H-B-(v/maxV)*(H-B-T);
+  const step=niceStep(maxV/4), ticks=[];for(let v=0;v<=maxV;v+=step)ticks.push(v);
+  const path=k=>c.months.map((p,i)=>(i?'L':'M')+x(p.m).toFixed(1)+','+y(p[k]).toFixed(1)).join(' ');
+  const last=c.months[c.months.length-1];
+  const xt=[];for(let m=0;m<=eco.h;m+=eco.h>24?12:6)xt.push(m);
+  const ex=c.exact!==null&&c.exact<=eco.h?c.exact:null;
+  let ly1=y(last.cur), ly2=y(last.nw); if(Math.abs(ly1-ly2)<16){ if(ly1<ly2) ly2=ly1+16; else ly1=ly2+16; }
+  return `<svg class="chart" id="eco-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Custo acumulado em ${eco.h} meses: plataforma atual ${mil(last.cur)}, nova plataforma ${mil(last.nw)}">
+    ${ticks.map(v=>`<line x1="${L}" x2="${W-Rr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="var(--line)" ${v?'stroke-dasharray="2 4"':''}/><text x="${L-8}" y="${(y(v)+4).toFixed(1)}" text-anchor="end">${v?Math.round(v/1000)+' mil':'0'}</text>`).join('')}
+    ${xt.map(m=>`<text x="${x(m).toFixed(1)}" y="${H-B+18}" text-anchor="middle">${m===0?'início':'mês '+m}</text>`).join('')}
+    ${ex!==null?`<line x1="${x(ex).toFixed(1)}" x2="${x(ex).toFixed(1)}" y1="${T}" y2="${H-B}" stroke="var(--ok)" stroke-dasharray="4 3"/><text x="${(x(ex)+6).toFixed(1)}" y="${T+10}" style="fill:var(--ok)">equilíbrio · mês ${ex.toFixed(1).replace('.',',')}</text>`:''}
+    <path d="${path('cur')}" fill="none" stroke="var(--chart-a)" stroke-width="2" stroke-linejoin="round"/>
+    <path d="${path('nw')}" fill="none" stroke="var(--chart-b)" stroke-width="2.4" stroke-linejoin="round"/>
+    <circle cx="${x(last.m)}" cy="${y(last.cur)}" r="4" fill="var(--chart-a)" stroke="var(--surface)" stroke-width="2"/>
+    <circle cx="${x(last.m)}" cy="${y(last.nw)}" r="4" fill="var(--chart-b)" stroke="var(--surface)" stroke-width="2"/>
+    <text class="lbl" x="${x(last.m)+10}" y="${ly1+4}">Atual ${mil(last.cur)}</text>
+    <text class="lbl" x="${x(last.m)+10}" y="${ly2+4}">Nova ${mil(last.nw)}</text>
+    <line id="eco-x" x1="0" x2="0" y1="${T}" y2="${H-B}" stroke="var(--ink-3)" stroke-width="1" opacity="0"/>
+    <rect x="${L}" y="${T}" width="${W-L-Rr}" height="${H-B-T}" fill="transparent" id="eco-hit"/>
+  </svg>`;
+}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const n=raw/p;return (n<1.5?1:n<3?2:n<7?5:10)*p;}
+function vEconomia(){
+  const c=ecoCalc(), last=c.months[c.months.length-1];
+  const fld=(k,l,stepv)=>`<div class="field"><label for="eco-${k}">${l}</label><input id="eco-${k}" type="number" min="0" step="${stepv}" value="${eco[k]}" data-eco="${k}"></div>`;
+  return `<div class="pagehead"><div><div class="eyebrow">Quanto o grupo economiza</div><h1>Economia</h1></div>
+  <p class="muted small">Valores de exemplo para a conversa. Ajuste os campos e o gráfico recalcula.</p></div>
+  <section class="panel"><div class="inputs">
+    ${fld('n','Condomínios atendidos',1)}${fld('atual','Plataforma atual · R$ por condomínio/mês',10)}${fld('nova','Nova plataforma · R$ por condomínio/mês',10)}
+    ${fld('impl','Implantação · R$ (uma vez)',1000)}${fld('overlap','Meses pagando as duas na migração',1)}${fld('h','Horizonte · meses',6)}
+  </div></section>
+  <section class="grid kpis">
+    <div class="kpi"><span class="eyebrow">Hoje o grupo paga</span><span class="v num">${brl(c.A)}</span><span class="d">por mês · ${brl(c.A*12)} por ano</span></div>
+    <div class="kpi"><span class="eyebrow">Com a nova plataforma</span><span class="v num">${brl(c.N)}</span><span class="d">por mês</span></div>
+    <div class="kpi"><span class="eyebrow">Economia mensal</span><span class="v num" style="color:${c.save>0?'var(--ok)':'var(--crit)'}">${brl(c.save)}</span><span class="d">${brl(c.save*12)} por ano</span></div>
+    <div class="kpi"><span class="eyebrow">Implantação se paga em</span><span class="v">${c.exact!==null&&c.save>0?c.exact.toFixed(1).replace('.',','):'—'}<small> meses</small></span><span class="d">já contando ${eco.overlap} ${eco.overlap===1?'mês':'meses'} com as duas plataformas</span></div>
+  </section>
+  <section class="panel"><div class="panel-h"><h2>Custo acumulado em ${eco.h} meses</h2>
+    <div class="legend"><span><span class="swatch" style="--sw:var(--chart-a)"></span>Plataforma atual</span><span><span class="swatch" style="--sw:var(--chart-b)"></span>Nova plataforma (com implantação)</span></div></div>
+    <div style="overflow-x:auto">${ecoChart(c)}</div>
+    <p class="small" style="margin-top:8px">Em ${eco.h} meses: <b class="num">${brl(last.cur-last.nw)}</b> a menos no caixa do grupo${last.cur-last.nw<0?' (negativo: revise os valores)':''}.</p></section>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>Ganhos que não entram nessa conta</h3><ul style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.9rem">
+      <li><b>Venda cruzada:</b> 34 serviços do grupo ainda não contratados nos condomínios atuais</li>
+      <li><b>Renovação:</b> síndico com relatório mensal comprovado troca menos de prestadora</li>
+      <li><b>Glosa:</b> em contratos públicos, cada falha comprovada ou contestada no prazo vira dinheiro recebido</li>
+      <li><b>Folha:</b> menos hora extra e falta sem cobertura</li>
+      <li><b>Fim do caderno:</b> encomenda e visitante com registro digital reduzem extravio, disputa com morador e retrabalho na portaria</li></ul></div>
+    <div class="panel"><h3>O que o sistema passa a ser do grupo</h3><ul style="margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.9rem">
+      <li>Feito para as quatro empresas, não adaptado de um app genérico</li>
+      <li>Marca do grupo no portal do síndico e nos relatórios</li>
+      <li>Evolução guiada pela operação do grupo</li>
+      <li>Opção de participar da plataforma quando ela for oferecida a outras empresas do setor</li></ul></div>
+  </section>`;
+}
+document.addEventListener('change',e=>{const i=e.target.closest('[data-eco]');if(i){const v=Math.max(0,Number(i.value)||0);eco[i.dataset.eco]=i.dataset.eco==='h'?Math.max(6,Math.min(60,v)):v;render();const el=document.getElementById('eco-'+i.dataset.eco);if(el)el.focus();}});
+
+
+/* ================= v2: dados de portaria ================= */
+const R2 = rng(777);
+CONDOS.forEach(c=>{
+  c.pk = {recv:Math.round(c.size*.11+R2()*4), wait:Math.round(c.size*.07+R2()*3), avgH:+(5+R2()*7).toFixed(1)};
+  c.pk.over = Math.max(0,Math.round(c.pk.wait*.12+R2()*1.4));
+  c.acc = {visit:Math.round(2+c.size/45+R2()*3), auto:Math.round(88+R2()*9), entries:Math.round(c.size*1.9+R2()*40)};
+});
+CD.c1.pk = {recv:27, wait:11, over:1, avgH:9.6};
+CD.c1.acc = {visit:6, auto:94, entries:468};
+
+const PK = [
+  {id:'p1', unit:'1204 B', who:'Marina Costa',   car:'Mercado Livre', code:'ML 4412 9083',        min:12,   pos:'C3',      st:'aguardando'},
+  {id:'p11',unit:'503 B',  who:'Tiago Rocha',    car:'iFood',         code:'Pedido 7731',         min:3,    pos:'Balcão',  st:'urgente'},
+  {id:'p2', unit:'803 A',  who:'Rafael Lima',    car:'Correios',      code:'QB 718 223 405 BR',   min:45,   pos:'A1',      st:'aguardando'},
+  {id:'p12',unit:'710 A',  who:'Fernanda Reis',  car:'Correios · AR', code:'JT 102 334 118 BR',   min:60,   pos:'Cofre',   st:'registrada'},
+  {id:'p3', unit:'1502 B', who:'Helena Duarte',  car:'Amazon',        code:'TBA 3021 7744',       min:70,   pos:'B2',      st:'aguardando'},
+  {id:'p4', unit:'304 A',  who:'Jorge Antunes',  car:'Shopee',        code:'BR 26 4471 0932',     min:130,  pos:'B4',      st:'aguardando'},
+  {id:'p5', unit:'1101 A', who:'Clara Menezes',  car:'Magalu',        code:'MGZ 55 1039',         min:210,  pos:'A3',      st:'aguardando'},
+  {id:'p6', unit:'602 B',  who:'Paulo Henrique', car:'Jadlog',        code:'JD 1092 3381',        min:1500, pos:'D1',      st:'aguardando'},
+  {id:'p7', unit:'207 A',  who:'Sônia Prado',    car:'Correios',      code:'QH 912 551 008 BR',   min:3300, pos:'D2',      st:'aguardando'},
+  {id:'p8', unit:'1408 B', who:'Bruno Taveira',  car:'Loggi',         code:'LG 7731 2290',        min:40,   pos:'—',       st:'retirada', by:'o próprio morador · QR'},
+  {id:'p9', unit:'905 A',  who:'Lívia Castro',   car:'Mercado Livre', code:'ML 4410 1176',        min:95,   pos:'—',       st:'retirada', by:'Rosa (autorizada) · código + foto'},
+  {id:'p10',unit:'1204 B', who:'Marina Costa',   car:'Amazon',        code:'Pedido 702-8811',     min:null, pos:'—',       st:'previsto', track:'Saiu para entrega'}
+];
+const PKST = {
+  aguardando: p => p.min>2880?'<span class="pill s-crit">Mais de 48h</span>':p.min>1440?'<span class="pill s-warn">Mais de 24h</span>':'<span class="pill s-warn">Aguardando retirada</span>',
+  urgente: () => '<span class="pill s-crit">Comida · morador descendo</span>',
+  registrada: () => '<span class="pill s-info">Registrada · só o destinatário</span>',
+  retirada: p => `<span class="pill s-ok">✓ Retirada · ${esc(p.by)}</span>`,
+  previsto: p => `<span class="pill s-info">Pré-aviso · ${esc(p.track)}</span>`
+};
+let pkSeq = 20;
+
+function pkScope(){ const r=ROLES[state.role]; return CONDOS.filter(c=>!r.condos||r.condos.includes(c.id)); }
+function vEncomendas(){
+  const condos=pkScope(), one = condos.length===1 || state.role==='colaborador';
+  const sum=k=>condos.reduce((a,c)=>a+c.pk[k],0);
+  const avg=(condos.reduce((a,c)=>a+c.pk.avgH,0)/condos.length).toFixed(1).replace('.',',');
+  const rows = PK.map(p=>`<tr>
+    <td><b>${p.unit}</b><br><span class="small muted">${esc(p.who)}</span></td>
+    <td><span class="carrier">${esc(p.car)}</span><br><span class="small muted mono">${esc(p.code)}</span></td>
+    <td class="num">${p.min===null?'—':fmtMin(p.min)}</td>
+    <td class="num">${p.pos}</td>
+    <td>${PKST[p.st](p)}</td>
+    <td>${['aguardando','registrada','urgente'].includes(p.st)?`<button class="btn" data-pk="${p.id}">Registrar retirada</button>`:''}</td></tr>`).join('');
+  return `${state.role==='diretor'?'':scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">Fim do caderno</div><h1>Encomendas</h1></div>
+  <p class="muted small">Do recebimento à retirada com prova digital: foto do volume, leitura da etiqueta, aviso com foto, endereço na prateleira e retirada com QR, foto e assinatura na tela.</p></div>
+  <section class="grid kpis">
+    <div class="kpi"><span class="eyebrow">Recebidas hoje</span><span class="v">${sum('recv')}</span><span class="d">${one?'Residencial Ipê Amarelo':condos.length+' condomínios'}</span></div>
+    <div class="kpi"><span class="eyebrow">Aguardando retirada</span><span class="v">${sum('wait')}</span><span class="d">moradores já avisados por push e WhatsApp</span></div>
+    <div class="kpi ${sum('over')?'alert':''}"><span class="eyebrow">Acima de 48h</span><span class="v">${sum('over')}</span><span class="d">lembrete automático enviado</span></div>
+    <div class="kpi"><span class="eyebrow">Tempo até a retirada</span><span class="v">${avg}<small> h</small></span><span class="d">média do mês</span></div>
+    <div class="kpi"><span class="eyebrow">Retiradas com prova digital</span><span class="v">100<small>%</small></span><span class="d">QR ou código + foto + assinatura · zero papel</span></div>
+  </section>
+  ${!one?`<section class="panel"><div class="panel-h"><h2>Por condomínio</h2><span class="small muted">hoje</span></div><div class="tbl-wrap"><table><thead><tr><th>Condomínio</th><th class="c">Recebidas</th><th class="c">Aguardando</th><th class="c">Acima de 48h</th><th class="c">Tempo até retirada</th></tr></thead><tbody>
+    ${condos.slice().sort((a,b)=>b.pk.wait-a.pk.wait).map(c=>`<tr><td>${esc(c.name)}</td><td class="c num">${c.pk.recv}</td><td class="c num">${c.pk.wait}</td><td class="c num ${c.pk.over?'ipo-low':''}">${c.pk.over}</td><td class="c num">${String(c.pk.avgH).replace('.',',')} h</td></tr>`).join('')}
+  </tbody></table></div></section>`:''}
+  <section class="panel"><div class="panel-h"><h2>Sala de encomendas · Residencial Ipê Amarelo</h2><button class="btn primary" id="pk-sim">Simular recebimento</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Unidade</th><th>Origem</th><th>Há</th><th>Posição</th><th>Situação</th><th></th></tr></thead><tbody id="pk-rows">${rows}</tbody></table></div></section>
+  <section class="grid cols-2e">
+      <div class="panel"><div class="panel-h"><h2>Recebimento em 10 segundos</h2></div><div class="steps" id="pk-steps">
+        ${[['Foto do volume','tirada pelo tablet da portaria'],['Código lido','código de barras ou QR da etiqueta'],['Etiqueta lida (OCR)','nome e apartamento'],['Morador encontrado','cruza com o cadastro e com o pré-aviso'],['Posição definida','prateleira e etiqueta interna com QR'],['Morador avisado','push e WhatsApp com a foto e o QR de retirada']].map((s,i)=>`<div class="step on"><i>${i+1}</i><div>${s[0]}<small>${s[1]}</small></div></div>`).join('')}
+      </div></div>
+      <div class="panel"><h3>Regras automáticas</h3><ul style="margin:8px 0 0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:4px">
+        <li>Lembrete ao morador em 24h, 48h e 7 dias</li><li>Após o prazo de guarda, devolução registrada com foto</li>
+        <li>Correspondência registrada (AR): só o destinatário retira</li><li>Comida e perecível: aviso urgente e prioridade no balcão</li>
+        <li>Retirada por terceiro só se o morador autorizar no app</li><li>Conferência diária: contagem física × sistema</li></ul></div>
+  </section>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>Transportadoras reconhecidas</h3><div class="tagline" style="margin-top:8px">${['Correios','Mercado Livre','Amazon','Shopee','Magalu','Jadlog','Loggi','Total Express','iFood e entregas de comida'].map(t=>`<span class="carrier">${t}</span>`).join('')}</div>
+      <p class="small muted" style="margin-top:10px">Pré-aviso: o morador cadastra o código de rastreio ou do pedido no app. Correios, Jadlog, Shopee e outras são acompanhadas por um agregador de rastreio; para Mercado Livre e Amazon com entrega própria, o casamento acontece na chegada, pela etiqueta.</p></div>
+    <div class="panel"><h3>Armários inteligentes 24h (opcional)</h3><p class="small muted" style="margin-top:6px">Para condomínios com portaria remota ou muito volume: o entregador deposita, o morador recebe o código no app e retira a qualquer hora. A integração é por API com fornecedores de armários, e pode virar uma linha de receita do grupo em parceria.</p></div>
+  </section>`;
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('#pk-sim')){
+    const steps=[...document.querySelectorAll('#pk-steps .step')]; steps.forEach(s=>s.classList.remove('on'));
+    steps.forEach((s,i)=>setTimeout(()=>s.classList.add('on'),250+i*380));
+    setTimeout(()=>{ PK.unshift({id:'p'+(++pkSeq),unit:'1806 A',who:'Gustavo Neri',car:'Mercado Livre',code:'ML 4415 22'+pkSeq,min:0,pos:'C4',st:'aguardando'}); CD.c1.pk.recv++; CD.c1.pk.wait++; render(); toast('Encomenda registrada. Gustavo (1806 A) recebeu push e WhatsApp com a foto e o QR.'); }, 250+steps.length*380+150);
+    return;
+  }
+  const b=e.target.closest('[data-pk]'); if(b){ const p=PK.find(x=>x.id===b.dataset.pk); p.st='retirada'; p.pos='—'; p.by=p.car.includes('AR')?'destinatário · documento + assinatura':'QR validado · foto + assinatura'; CD.c1.pk.wait=Math.max(0,CD.c1.pk.wait-1); render(); toast('Retirada registrada com foto e assinatura. O morador recebeu a confirmação.'); }
+});
+
+/* ================= CONTROLE DE ACESSO ================= */
+const VISITS = [
+  ['AP','Ana Paula Ribeiro','Visitante','1204 B','19:04','Liberada pela moradora no app','ok'],
+  ['PA','Pedro Almeida','Visitante','1101 A','19:22','Convite QR · janela 19h–23h','ok'],
+  ['JB','João Batista','Entregador','503 B','21:28','Liberado pelo app · aguardando saída','ok'],
+  ['MV','Marcos Vieira','Prestador · elevador','Área comum','14:10','Ordem de serviço 2231','ok'],
+  ['RL','Rosa Lima','Diarista autorizada','905 A','08:02','Recorrente · ter e sex, 8h–17h','ok'],
+  ['LP','Luana Pires','Visitante','302 B','13:40','Sem saída registrada há 8h','warn']
+];
+const EVENTS = [
+  ['há 1 min','PL','ok','<span class="plate">FJK2B47</span> entrada automática · moradora do 1204 B · leitura 98%'],
+  ['há 3 min','FC','ok','Saída automática pela facial · visitante Carla M. (802 A) · ficou 1h12'],
+  ['há 5 min','APP','ok','Entregador liberado pelo app · morador do 503 B'],
+  ['há 8 min','PL','warn','<span class="plate">RTA9C11</span> placa não cadastrada · aguardando decisão da portaria'],
+  ['há 14 min','QR','ok','Convite QR validado · Pedro A. para 1101 A'],
+  ['há 21 min','FC','ok','Entrada pela facial · morador do 1502 B'],
+  ['há 26 min','IN','ok','Morador do 803 A avisou "estou chegando" · portão preparado']
+];
+const PLATES = [['FJK2B47','Moradora 1204 B · Onix prata','98%','ok'],['QRS8D12','Morador 803 A · Compass preto','97%','ok'],['GHT1A55','Visitante pré-autorizado 1101 A','96%','ok'],['RTA9C11','Não cadastrada','95%','warn']];
+function vAcesso(){
+  const condos=pkScope(), one=condos.length===1||state.role==='colaborador';
+  const visit=condos.reduce((a,c)=>a+c.acc.visit,0), entries=condos.reduce((a,c)=>a+c.acc.entries,0), auto=Math.round(condos.reduce((a,c)=>a+c.acc.auto,0)/condos.length);
+  return `${state.role==='diretor'?'':scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">Portaria</div><h1>Controle de acesso</h1></div>
+  <p class="muted small">Visitante com convite, foto e documento; morador libera pelo app; veículos entram pela placa; a saída do visitante fecha sozinha pela facial.</p></div>
+  <section class="grid kpis">
+    <div class="kpi"><span class="eyebrow">Visitantes agora</span><span class="v">${visit}</span><span class="d">${one?'no Residencial Ipê Amarelo':'em '+condos.length+' condomínios'}</span></div>
+    <div class="kpi"><span class="eyebrow">Entradas hoje</span><span class="v">${fmt(entries)}</span><span class="d">pessoas e veículos</span></div>
+    <div class="kpi"><span class="eyebrow">Sem intervenção</span><span class="v">${auto}<small>%</small></span><span class="d">placa, facial ou QR, sem o porteiro digitar</span></div>
+    <div class="kpi alert"><span class="eyebrow">Pendências</span><span class="v">2</span><span class="d">1 placa sem cadastro · 1 visitante sem saída</span></div>
+  </section>
+  <section class="grid cols-2">
+    <div class="panel"><div class="panel-h"><h2>Agora na portaria · Ipê Amarelo</h2><button class="btn primary" id="vs-sim">Simular chegada de visitante</button></div>
+      <div id="vs-box" class="sim" hidden></div>
+      <div style="margin-top:6px">${EVENTS.map(e=>`<div class="ev"><time>${e[0]}</time><span class="ic ${e[2]}">${e[1]}</span><span>${e[3]}</span></div>`).join('')}</div>
+      <p class="small muted" style="margin-top:8px">PL leitura de placa · FC facial · QR convite · APP liberado pelo morador · IN aviso de chegada</p></div>
+    <div class="panel"><div class="panel-h"><h2>Placas reconhecidas</h2></div>
+      ${PLATES.map(p=>`<div class="dev"><span><span class="plate">${p[0]}</span> <span class="small muted">${p[1]}</span></span>${p[3]==='ok'?`<span class="pill s-ok">✓ ${p[2]}</span>`:`<span style="display:flex;gap:6px"><button class="btn" data-toast="A portaria liga para a unidade indicada pelo motorista e registra quem autorizou.">Ligar e liberar</button><button class="btn danger" data-toast="Entrada recusada e registrada com a foto da placa.">Recusar</button></span>`}</div>`).join('')}
+      <h3 style="margin-top:16px">Equipamentos</h3>
+      ${[['Câmera de placa · portão de veículos','online'],['Terminal facial · entrada social','online'],['Terminal facial · saída de pedestres','online'],['Cancela da garagem','online'],['Tablet da portaria','sincronizado']].map(d=>`<div class="dev"><span>${d[0]}</span><span class="pill s-ok">✓ ${d[1]}</span></div>`).join('')}
+      <p class="small muted" style="margin-top:8px">Funciona com os equipamentos que o grupo já instala (câmeras de placa, terminais faciais, cancelas). Marcas a confirmar no diagnóstico.</p></div>
+  </section>
+  <section class="panel"><div class="panel-h"><h2>Pessoas no condomínio</h2><span class="small muted">visitantes, prestadores e autorizados</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Pessoa</th><th>Tipo</th><th>Destino</th><th>Entrada</th><th>Como entrou</th><th>Saída</th></tr></thead><tbody>
+    ${VISITS.map(v=>`<tr><td><div class="who"><span class="avatar">${v[0]}</span><div><b>${v[1]}</b><span>foto + documento na entrada</span></div></div></td><td>${v[2]}</td><td>${v[3]}</td><td class="num">${v[4]}</td><td class="small">${v[5]}</td><td>${v[6]==='warn'?'<span class="pill s-warn">! Sem saída</span>':'<span class="pill s-idle">Automática pela facial</span>'}</td></tr>`).join('')}
+    </tbody></table></div></section>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>Jornada do visitante</h3><div class="steps" style="margin-top:10px">
+      ${[['Convite','o morador gera um QR com dia e horário'],['Chegada','foto e documento lidos pela câmera (OCR)'],['Liberação','o morador recebe a foto no celular e libera ou recusa'],['Entrada','registrada com horário e quem autorizou'],['Saída','a facial reconhece a foto da entrada e fecha a visita'],['Limpeza','foto e documento apagados no prazo definido pelo condomínio']].map((s,i)=>`<div class="step on"><i>${i+1}</i><div>${s[0]}<small>${s[1]}</small></div></div>`).join('')}</div></div>
+    <div class="panel"><h3>Privacidade (LGPD)</h3><ul style="margin:8px 0 0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:5px">
+      <li>Rosto é dado sensível: facial é opcional e sempre há alternativa (QR, tag ou senha)</li>
+      <li>Consentimento registrado no app, com opção de revogar</li>
+      <li>Prazo de guarda de fotos e documentos definido por condomínio, com exclusão automática</li>
+      <li>Só portaria e supervisão do próprio condomínio veem fotos de visitantes</li>
+      <li>Relatório de impacto (RIPD) entregue ao condomínio na implantação</li></ul></div>
+  </section>`;
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('#vs-sim')){
+    const box=document.getElementById('vs-box'); box.hidden=false;
+    const S=[['Foto capturada','câmera da portaria'],['Documento lido','CNH · Ana Paula Ribeiro'],['Destino','1204 B · Marina Costa'],['Morador avisado','push com foto e botões Liberar / Recusar'],['Liberada pela moradora','resposta em 19 segundos'],['Entrada registrada','saída será fechada pela facial']];
+    box.innerHTML=`<div class="steps">${S.map((s,i)=>`<div class="step" data-i="${i}"><i>${i+1}</i><div>${s[0]}<small>${s[1]}</small></div></div>`).join('')}</div>`;
+    const els=[...box.querySelectorAll('.step')];
+    els.forEach((el,i)=>setTimeout(()=>{el.classList.add('on'); if(i===3){el.classList.add('wait');} if(i===4){els[3].classList.remove('wait');} if(i===els.length-1)toast('Visitante liberada pelo app. Entrada registrada com foto e documento.');},300+i*(i===4?900:450)));
+  }
+});
+
+/* ================= APP DO MORADOR ================= */
+function qrSvg(){
+  const r=rng(42), n=21, s=6; let cells='';
+  const fin=(x,y)=>`<rect x="${x*s}" y="${y*s}" width="${7*s}" height="${7*s}" fill="#0E1B33"/><rect x="${(x+1)*s}" y="${(y+1)*s}" width="${5*s}" height="${5*s}" fill="#fff"/><rect x="${(x+2)*s}" y="${(y+2)*s}" width="${3*s}" height="${3*s}" fill="#0E1B33"/>`;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ const inF=(x<8&&y<8)||(x>12&&y<8)||(x<8&&y>12); if(!inF&&r()>.52) cells+=`<rect x="${x*s}" y="${y*s}" width="${s}" height="${s}" fill="#0E1B33"/>`; }
+  return `<svg class="qr" viewBox="0 0 ${n*s} ${n*s}" role="img" aria-label="QR de retirada ilustrativo">${cells}${fin(0,0)}${fin(14,0)}${fin(0,14)}</svg>`;
+}
+function vMorador(){
+  const MT=['Início','Encomendas','Visitas','Mais'];
+  const head=(t,s)=>`<div class="apphead"><b>${t}</b><span>${s}</span></div>`;
+  const p1=phone(head('Olá, Marina','1204 B · Residencial Ipê Amarelo'),`
+    <div class="acard"><b>1 encomenda chegou</b><span class="muted">Mercado Livre · prateleira C3 · há 12 min</span><span style="color:var(--focus);font-weight:600">Ver QR de retirada →</span></div>
+    <div class="acard"><b>Visitante hoje às 19:00</b><span class="muted">Ana Paula · convite enviado por WhatsApp</span></div>
+    <div class="acard"><b>Comunicado do síndico</b><span class="muted">Manutenção da bomba amanhã, 9h–12h</span><span style="color:var(--warn);font-weight:600">Confirmar leitura</span></div>
+    <div class="acard"><b>Seu cadastro: 85%</b><div class="progress"><i style="width:85%;background:var(--warn)"></i></div><span class="muted">Falta contato de emergência · revisar até 15/10</span></div>
+    <div class="abtns"><div class="abtn" style="grid-column:1 / -1;background:#0E1B33;color:#fff;border-color:#0E1B33">Estou chegando</div><div class="abtn">Convidar visitante</div><div class="abtn">Autorizar retirada</div></div>`,'Início',MT);
+  const p2=phone(head('Visitante na portaria','agora · portaria principal'),`
+    <div class="acard" style="align-items:center;text-align:center;gap:8px"><span class="avatar" style="width:72px;height:72px;font-size:1.4rem">AP</span><b style="font-size:1rem">Ana Paula Ribeiro</b><span class="muted">CNH conferida · foto da entrada</span><span class="pill s-info">Convite seu · válido até 23:00</span></div>
+    <div class="abtns"><div class="abtn" style="background:#1E7F47;color:#fff;border-color:#1E7F47">Liberar</div><div class="abtn">Recusar</div><div class="abtn" style="grid-column:1 / -1">Falar com a portaria</div></div>
+    <span class="small muted" style="text-align:center">Sem resposta em 2 minutos, a portaria liga para você.</span>`,'Visitas',MT);
+  const p3=phone(head('Meu cadastro','você é responsável por mantê-lo atualizado'),`
+    <div class="acard"><b>Completo: 85%</b><div class="progress"><i style="width:85%;background:var(--warn)"></i></div><span class="muted">Última revisão em 03/2026 · revisar a cada 6 meses</span></div>
+    <div class="acard">
+      <div class="compl"><span>Moradores</span><b>3 pessoas</b></div>
+      <div class="compl"><span>Veículos</span><b><span class="plate">FJK2B47</span> <span class="plate">RTB4C21</span></b></div>
+      <div class="compl"><span>Autorizados</span><b>Rosa · ter e sex, 8h–17h</b></div>
+      <div class="compl"><span>Pets</span><b>1 cachorro</b></div>
+      <div class="compl"><span>Contato de emergência</span><b class="miss">Falta</b></div>
+      <div class="compl"><span>Facial</span><b>Ativa · pode desligar</b></div></div>
+    <div class="acard"><span class="muted">Ao salvar, você confirma que os dados são verdadeiros e autoriza seu uso pela portaria.</span></div>`,'Mais',MT);
+  const p4=phone(head('Retirar encomenda','mostre o QR na portaria'),`
+    <div class="acard" style="align-items:center;gap:8px">${qrSvg()}<b>Mercado Livre · prateleira C3</b><span class="muted">Código alternativo: 4 8 2 1</span></div>
+    <div class="acard"><b>Outra pessoa vai retirar?</b><span class="muted">Autorize pelo nome; ela mostra o documento e a portaria tira foto.</span></div>
+    <div class="acard"><b>Pré-aviso</b><span class="muted">Amazon · pedido 702-8811 · saiu para entrega</span></div>`,'Encomendas',MT);
+  return `${state.role==='morador'?'':`<div class="scope"><b style="white-space:nowrap">Prévia</b><span>App do morador. Quem não instalar continua recebendo encomendas e visitantes pelo WhatsApp, com link.</span></div>`}
+  <div class="pagehead"><div><div class="eyebrow">Morador</div><h1>App do morador</h1></div>
+  <p class="muted small">O morador cuida do próprio cadastro, libera visitantes, retira encomendas com QR e avisa quando está chegando. A portaria ganha tempo e o condomínio ganha registro.</p></div>
+  <div class="phones">
+    <div class="phone-wrap">${p1}<span class="small muted">Início com encomendas, visitantes, comunicados e o botão "Estou chegando".</span></div>
+    <div class="phone-wrap">${p2}<span class="small muted">Visitante na portaria: foto, documento conferido e liberação com um toque.</span></div>
+    <div class="phone-wrap">${p3}<span class="small muted">Cadastro da unidade com revisão obrigatória e termo de responsabilidade.</span></div>
+    <div class="phone-wrap">${p4}<span class="small muted">Retirada por QR, autorização de terceiro e pré-aviso de compras.</span></div>
+  </div>
+  <section class="grid cols-2e">
+    <div class="panel"><h3>"Estou chegando"</h3><p class="small muted" style="margin-top:6px">A portaria recebe a placa e o tempo estimado; o portão fica pronto e, à noite, o porteiro acompanha a chegada pela câmera. O aviso automático por localização é opcional e só funciona se o morador permitir.</p></div>
+    <div class="panel"><h3>Cadastro em dia é responsabilidade do morador</h3><p class="small muted" style="margin-top:6px">Lembrete mensal enquanto houver pendência, revisão obrigatória a cada 6 meses e aviso à portaria quando a unidade estiver com cadastro vencido. Veículo sem cadastro não entra pela placa.</p></div>
+  </section>`;
+}
+
+/* ================= CENTRAL DE NOTIFICAÇÕES ================= */
+const NROWS = [
+  ['Encomenda recebida','Morador da unidade','Push + WhatsApp com foto','norm','Lembrete em 24h, 48h e 7 dias'],
+  ['Visitante na portaria','Morador da unidade','Push com foto e botões','high','Sem resposta em 2 min, a portaria liga'],
+  ['Morador chegando','Portaria do condomínio','Push no tablet','high','Com placa e tempo estimado'],
+  ['Placa não cadastrada','Portaria e supervisor','Push','high','Entra na fila de decisão'],
+  ['Visitante sem saída','Portaria e supervisor','Push no fim do turno','norm','Fecha ou justifica'],
+  ['Posto descoberto','Supervisor → coordenador → gerente','Push crítico + WhatsApp + ligação','crit','Escalonamento a cada 5 min'],
+  ['SOS ou senha de coação','Supervisor, central e diretoria','Alarme crítico','crit','Silencioso para quem acionou'],
+  ['Ronda não feita','Supervisor','Push','high','15 min após o horário'],
+  ['Tarefa em 15 minutos','Colaborador','Push','norm','Só no turno da pessoa'],
+  ['Mudança de escala','Colaborador','Push + WhatsApp','norm','Exige confirmação'],
+  ['Certificado vencendo','RH e gerente da empresa','Resumo diário','info','60, 30 e 15 dias antes'],
+  ['Ocorrência grave','Síndico do condomínio','Push + WhatsApp','high','O grupo decide o que o síndico vê'],
+  ['Relatório mensal pronto','Síndico','E-mail + push','info','Dia 1 de cada mês'],
+  ['Comunicado do síndico','Moradores (por bloco ou unidade)','Push + WhatsApp','norm','Agendado, com leitura confirmada'],
+  ['Cadastro desatualizado','Morador','Push mensal','info','Até a revisão'],
+  ['Índice abaixo da meta','Gerente e diretoria','Resumo diário','norm','Por condomínio e serviço']
+];
+const PRIO = {crit:['Crítico','s-crit','var(--crit)'],high:['Alto','s-warn','var(--c3)'],norm:['Normal','s-info','var(--focus)'],info:['Informativo','s-idle','var(--idle)']};
+let QUEUE = [
+  ['Manutenção da bomba de recalque · amanhã 9h–12h','Moradores · Morada do Lago · bloco B','amanhã 07:30','Push + WhatsApp · leitura confirmada'],
+  ['Escala da semana','Colaboradores · 4 empresas','domingo 18:00','Push · exige confirmação'],
+  ['Revise seu cadastro','Moradores com cadastro vencido · 18 condomínios','dia 1 · 19:00','Push · recorrente'],
+  ['Reciclagem da brigada vence em 30 dias','RH e gerente · Fortsbravo','segunda 08:00','Resumo diário'],
+  ['Relatório de setembro disponível','Síndicos · 18 condomínios','01/10 09:00','E-mail + push · enviado']
+];
+let NOTIF = {to:'moradores', where:'c16', msg:'Manutenção da bomba de recalque amanhã, das 9h às 12h. Pode faltar água no bloco B.', push:true, wa:true, email:false, when:'ia', confirm:true};
+let RULES = {resumo:true, silencio:true, melhor:true, antirep:true, escalar:true};
+function audOptions(){
+  if(state.role==='sindico') return [['moradores','Moradores do condomínio']];
+  if(state.role==='gerente') return [['colaboradores','Colaboradores da Fortslimp'],['supervisores','Encarregados da Fortslimp']];
+  return [['moradores','Moradores'],['sindicos','Síndicos'],['colaboradores','Colaboradores'],['supervisores','Supervisores'],['gerentes','Gerentes das empresas']];
+}
+function reach(){
+  const sc = state.role==='sindico'?[CD.c1]:NOTIF.where==='all'?scopeCondos():[CD[NOTIF.where]||CD.c1];
+  if(NOTIF.to==='moradores') { const u=sc.reduce((a,c)=>a+c.size,0); return `${fmt(u)} unidades · cerca de ${fmt(Math.round(u*1.6))} moradores`; }
+  if(NOTIF.to==='sindicos') return `${sc.length} síndico${sc.length>1?'s':''}`;
+  if(NOTIF.to==='colaboradores') { const r=ROLES[state.role]; const n=sc.reduce((a,c)=>a+Object.entries(c.svc).filter(([id])=>!r.company||id===r.company).reduce((b,[,s])=>b+s.colab,0),0); return `${fmt(n)} colaboradores`; }
+  if(NOTIF.to==='supervisores') return state.role==='gerente'?'3 encarregados':'6 supervisores';
+  return '4 gerentes';
+}
+function vNotificacoes(){
+  const isS=state.role==='sindico', opts=audOptions();
+  if(!opts.find(o=>o[0]===NOTIF.to)) NOTIF.to=opts[0][0];
+  const condoOpts = isS?[['c1','Residencial Ipê Amarelo']]:[['all','Todos do escopo']].concat(scopeCondos().map(c=>[c.id,c.name]));
+  if(isS) NOTIF.where='c1'; else if(!condoOpts.find(o=>o[0]===NOTIF.where)) NOTIF.where='all';
+  const whenLbl = NOTIF.when==='agora'?'agora':NOTIF.when==='agendar'?'amanhã 07:30':'melhor horário de cada pessoa';
+  const sw=(k,l,d)=>`<div class="rule-row"><div><b>${l}</b><span>${d}</span></div><button class="sw" role="switch" aria-checked="${RULES[k]}" aria-label="${l}" data-rule="${k}"></button></div>`;
+  return `${isS?`<div class="scope"><b style="white-space:nowrap">Escopo do perfil</b><span>O síndico envia comunicados só para os moradores do próprio condomínio, por bloco ou unidade.</span></div>`:scopeNote()}
+  <div class="pagehead"><div><div class="eyebrow">Push, WhatsApp, e-mail e ligação</div><h1>Central de notificações</h1></div>
+  <p class="muted small">Cada público recebe só o que é dele: o morador vê a própria unidade, o síndico o próprio condomínio, o gerente a própria empresa. Prioridade define som, canal e insistência.</p></div>
+  <section class="prio">${Object.entries(PRIO).map(([k,p])=>`<div style="--sev:${p[2]}"><b>${p[0]}</b><span class="muted">${{crit:'Alarme contínuo até alguém assumir; liga se ninguém responder',high:'Som próprio e vibração longa; repete em 2 min',norm:'Som padrão; respeita horário de silêncio',info:'Silencioso; entra no resumo do dia'}[k]}</span></div>`).join('')}</section>
+  <section class="panel"><div class="panel-h"><h2>Novo comunicado</h2><span class="small muted">alcance: <b id="n-reach">${reach()}</b></span></div>
+    <div class="composer"><div class="grid" style="gap:12px">
+      <div class="inputs">
+        <div class="field"><label for="n-to">Para</label><select id="n-to" data-n="to">${opts.map(o=>`<option value="${o[0]}" ${o[0]===NOTIF.to?'selected':''}>${o[1]}</option>`).join('')}</select></div>
+        <div class="field"><label for="n-where">Onde</label><select id="n-where" data-n="where">${condoOpts.map(o=>`<option value="${o[0]}" ${o[0]===NOTIF.where?'selected':''}>${esc(o[1])}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label for="n-msg">Mensagem</label><textarea id="n-msg" data-n="msg">${esc(NOTIF.msg)}</textarea></div>
+      <div class="field"><label>Canais</label><div class="checks">
+        <label><input type="checkbox" id="n-push" data-nc="push" ${NOTIF.push?'checked':''}> Push no app</label>
+        <label><input type="checkbox" id="n-wa" data-nc="wa" ${NOTIF.wa?'checked':''}> WhatsApp</label>
+        <label><input type="checkbox" id="n-email" data-nc="email" ${NOTIF.email?'checked':''}> E-mail</label>
+        <label><input type="checkbox" id="n-confirm" data-nc="confirm" ${NOTIF.confirm?'checked':''}> Exigir confirmação de leitura</label></div></div>
+      <div class="field"><label>Quando</label><div class="seg">${[['agora','Agora'],['agendar','Agendar'],['ia','Melhor horário (IA)']].map(w=>`<button data-when="${w[0]}" aria-pressed="${NOTIF.when===w[0]}">${w[1]}</button>`).join('')}</div>
+        <span class="small muted">${NOTIF.when==='ia'?'A IA envia no horário em que cada pessoa costuma abrir as mensagens, dentro da janela que você definir.':NOTIF.when==='agendar'?'Data e hora definidas por você; pode repetir toda semana ou todo mês.':'Envio imediato.'}</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="n-send">${NOTIF.when==='agora'?'Enviar agora':'Agendar envio'}</button><button class="btn" data-toast="No produto, a IA reescreve o texto em tom claro e curto, e você aprova antes de enviar.">Melhorar texto com IA</button></div>
+    </div>
+    <div class="lock"><div class="clock">07:30</div>
+      <div class="notif"><div class="nh"><span>${isS?'Residencial Ipê Amarelo':'Grupo FortSvig'} · Comunicado</span><span>agora</span></div><b>${NOTIF.confirm?'Confirme a leitura':'Aviso do condomínio'}</b><span>${esc(NOTIF.msg.slice(0,110))}${NOTIF.msg.length>110?'…':''}</span></div>
+      <div class="notif crit"><div class="nh"><span>Smart One · Crítico</span><span>há 2 min</span></div><b>Posto descoberto · Vila Romana</b><span>Portaria posto 2 sem check-in há 38 min</span></div>
+      <span style="color:#9DAECB;font-size:.75rem;text-align:center">Prévia na tela de bloqueio · envio: ${whenLbl}</span></div>
+    </div></section>
+  <section class="grid cols-2e">
+    <div class="panel"><div class="panel-h"><h2>Agendados</h2><span class="small muted">${QUEUE.length} na fila</span></div><div class="queue">${QUEUE.map(q=>`<div><div><b>${esc(q[0])}</b><br><span>${esc(q[1])} · ${esc(q[3])}</span></div><span class="num">${esc(q[2])}</span></div>`).join('')}</div></div>
+    <div class="panel"><div class="panel-h"><h2>Inteligência</h2></div>
+      ${sw('resumo','Resumo diário','Avisos informativos viram um resumo às 19h')}
+      ${sw('silencio','Horário de silêncio','22h às 7h só passam alertas críticos')}
+      ${sw('melhor','Melhor horário por pessoa','Aprende quando cada um costuma ler')}
+      ${sw('antirep','Sem repetição','O mesmo aviso não volta em menos de 4h')}
+      ${sw('escalar','Escalonar se ninguém ler','Push vira WhatsApp e depois ligação')}</div>
+  </section>
+  ${isS?'':`<section><div class="panel-h"><h2>Quem recebe o quê</h2><div class="legend">${Object.values(PRIO).map(p=>`<span><span class="pill ${p[1]}">${p[0]}</span></span>`).join('')}</div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Evento</th><th>Quem recebe</th><th>Canal</th><th>Prioridade</th><th>Regra</th></tr></thead><tbody>
+  ${NROWS.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="small">${r[2]}</td><td><span class="pill ${PRIO[r[3]][1]}">${PRIO[r[3]][0]}</span></td><td class="small muted">${r[4]}</td></tr>`).join('')}
+  </tbody></table></div></section>`}
+  <section class="panel"><div class="panel-h"><h2>Leitura do último comunicado</h2><span class="small muted">Relatório de setembro · 18 síndicos</span></div>
+    <div class="bars">${[['Entregue',99],['Aberto',86],['Confirmado',78],['Lido pelo push',64],['Lido pelo WhatsApp',93]].map(b=>`<div class="bar"><span>${b[0]}</span><div class="track"><i style="width:${b[1]}%"></i></div><b>${b[1]}%</b></div>`).join('')}</div></section>`;
+}
+document.addEventListener('click',e=>{
+  const w=e.target.closest('[data-when]'); if(w){NOTIF.when=w.dataset.when;render();return;}
+  const r=e.target.closest('[data-rule]'); if(r){RULES[r.dataset.rule]=!RULES[r.dataset.rule];r.setAttribute('aria-checked',RULES[r.dataset.rule]);return;}
+  if(e.target.closest('#n-send')){
+    const toLbl=(audOptions().find(o=>o[0]===NOTIF.to)||['',''])[1];
+    const whereLbl=NOTIF.where==='all'?'todos do escopo':(CD[NOTIF.where]?CD[NOTIF.where].name:'');
+    const ch=[NOTIF.push&&'Push',NOTIF.wa&&'WhatsApp',NOTIF.email&&'E-mail'].filter(Boolean).join(' + ')||'Push';
+    QUEUE.unshift([NOTIF.msg.slice(0,60)+(NOTIF.msg.length>60?'…':''), toLbl+' · '+whereLbl, NOTIF.when==='agora'?'enviando':NOTIF.when==='agendar'?'amanhã 07:30':'melhor horário', ch+(NOTIF.confirm?' · leitura confirmada':'')]);
+    render(); toast(NOTIF.when==='agora'?'Comunicado enviado para '+reach()+'.':'Comunicado agendado para '+reach()+'.');
+  }
+});
+document.addEventListener('change',e=>{
+  const s=e.target.closest('[data-n]'); if(s){NOTIF[s.dataset.n]=s.value; if(s.dataset.n!=='msg') render(); else { const rr=document.getElementById('n-reach'); if(rr) rr.textContent=reach(); } return;}
+  const c=e.target.closest('[data-nc]'); if(c){NOTIF[c.dataset.nc]=c.checked; render();}
+});
+document.addEventListener('input',e=>{const s=e.target.closest('[data-n="msg"]'); if(s){NOTIF.msg=s.value; const p=document.querySelector('.lock .notif span:last-child'); if(p) p.textContent=s.value.slice(0,110)+(s.value.length>110?'…':'');}});
+
+/* ================= MAPA DE FUNCIONALIDADES ================= */
+const FEAT = [
+ ['Operação de campo','Turno com selfie e PIN no celular do posto','C','MVP'],['Operação de campo','Checklist por função e horário, com foto','C','MVP'],['Operação de campo','Ronda por NFC que não pode ser copiada','C','MVP'],['Operação de campo','Ocorrência por voz organizada por IA','CP','MVP'],['Operação de campo','Funciona sem internet e sincroniza depois','CP','MVP'],['Operação de campo','Passagem de turno com chaves e equipamentos','CP','MVP'],['Operação de campo','SOS e confirmação de bem-estar','C','MVP'],['Operação de campo','Procedimentos do posto com confirmação de leitura','C','Fase 2'],['Operação de campo','Supervisão volante com checklist do posto','GC','Fase 2'],
+ ['Cobertura e alertas','Posto coberto ou descoberto em tempo real','G','MVP'],['Cobertura e alertas','Alertas com dono, prazo e escalonamento','G','MVP'],['Cobertura e alertas','Cobertura de falta com folguista','G','Fase 2'],['Cobertura e alertas','Detecção de ronda rápida demais e foto repetida','G','Fase 2'],['Cobertura e alertas','Previsão de faltas com IA','G','Fase 3'],
+ ['Notificações','Alertas distintos por público e escopo','GCPSM','MVP'],['Notificações','Quatro níveis de prioridade com som próprio','GCPSM','MVP'],['Notificações','Push, WhatsApp, e-mail e ligação automática','GCPSM','MVP'],['Notificações','Comunicados por condomínio, bloco, unidade e perfil','GS','MVP'],['Notificações','Agendamento e recorrência','GS','MVP'],['Notificações','Confirmação de leitura obrigatória','GCSM','MVP'],['Notificações','Resumo diário e horário de silêncio','GCPSM','MVP'],['Notificações','Painel de entregues, lidas e confirmadas','GS','MVP'],['Notificações','Envio no melhor horário de cada pessoa (IA)','GS','Fase 2'],['Notificações','Texto de comunicado melhorado por IA','GS','Fase 2'],
+ ['Encomendas','Recebimento com foto e leitura de código de barras ou QR','P','MVP'],['Encomendas','Leitura da etiqueta (OCR) com morador e unidade','P','MVP'],['Encomendas','Identificação da transportadora','P','MVP'],['Encomendas','Aviso imediato com foto por push e WhatsApp','M','MVP'],['Encomendas','Prateleira e etiqueta interna com QR','P','MVP'],['Encomendas','Retirada com QR, foto de quem retira e assinatura na tela','PM','MVP'],['Encomendas','Retirada por terceiro autorizado pelo morador','PM','MVP'],['Encomendas','Lembretes em 24h, 48h e 7 dias; devolução registrada','PM','MVP'],['Encomendas','Correspondência registrada (AR) com regra própria','P','MVP'],['Encomendas','Comida e perecível com aviso urgente','PM','MVP'],['Encomendas','Pré-aviso com código de rastreio ou do pedido','M','Fase 2'],['Encomendas','Rastreio automático por agregador','M','Fase 2'],['Encomendas','Conferência diária da sala de encomendas','PG','Fase 2'],['Encomendas','Integração com armários inteligentes 24h','PM','Fase 3'],
+ ['Controle de acesso','Convite de visitante com QR e janela de horário','M','MVP'],['Controle de acesso','Cadastro na portaria com foto e documento (OCR)','P','MVP'],['Controle de acesso','Morador libera ou recusa pelo app, com a foto','PM','MVP'],['Controle de acesso','Autorizados recorrentes com dias e horários','PM','MVP'],['Controle de acesso','Leitura de placa para entrada e saída de veículos','P','Fase 2'],['Controle de acesso','Placa não cadastrada vai para decisão da portaria','P','Fase 2'],['Controle de acesso','Saída automática do visitante pela facial','P','Fase 2'],['Controle de acesso','Facial opcional para moradores, com alternativa','PM','Fase 2'],['Controle de acesso','Prestadores com empresa e ordem de serviço','PS','Fase 2'],['Controle de acesso','Integração com câmeras, terminais faciais e cancelas','PG','Fase 2'],['Controle de acesso','Senha de coação','CM','Fase 2'],['Controle de acesso','Lista de convidados para festas e salão','M','Fase 3'],['Controle de acesso','Interfone pelo app','PM','Fase 3'],
+ ['App do morador','Cadastro da unidade: moradores, veículos, autorizados, pets, contatos','M','MVP'],['App do morador','Revisão obrigatória a cada 6 meses com termo de responsabilidade','M','MVP'],['App do morador','"Estou chegando" com placa e tempo estimado','PM','MVP'],['App do morador','Ver e apagar meus dados (LGPD)','M','MVP'],['App do morador','Chamados para o síndico e para as empresas','MS','Fase 2'],['App do morador','Reservas de áreas comuns','MS','Fase 3'],['App do morador','Aviso de chegada automático por localização','M','Fase 3'],
+ ['Portal do síndico','Portal único com todos os serviços do grupo','S','MVP'],['Portal do síndico','Relatório mensal assinado com QR de autenticidade','S','MVP'],['Portal do síndico','Chamados, aprovações e orçamentos','S','Fase 2'],['Portal do síndico','Documentos e prazos (AVCB, brigada, caixa d’água)','S','Fase 2'],
+ ['Gestão do grupo','Painel consolidado das quatro empresas','G','MVP'],['Gestão do grupo','Mapa de venda cruzada por condomínio','G','MVP'],['Gestão do grupo','Índice de performance por condomínio e serviço','G','MVP'],['Gestão do grupo','Usuários, perfis, escopos e auditoria','G','MVP'],['Gestão do grupo','Documentos e certificados dos colaboradores','G','Fase 2'],['Gestão do grupo','Equipamentos com QR e histórico','GC','Fase 2'],['Gestão do grupo','Manutenção preventiva e ordens de serviço','GCS','Fase 2'],['Gestão do grupo','Integração com Protheus','G','Fase 2'],['Gestão do grupo','Glosa e medição de contratos públicos (IMR)','G','Fase 3'],
+ ['Plataforma','Várias empresas com isolamento entre contas','G','MVP'],['Plataforma','Marca do grupo no portal e nos relatórios','G','MVP'],['Plataforma','Medição de uso e cobrança','G','Fase 2']
+];
+const PERS = {G:'Gestão',C:'Colaborador',P:'Portaria',S:'Síndico',M:'Morador'};
+let FF = {p:'all', f:'all'};
+function vFuncionalidades(){
+  const list=FEAT.filter(x=>(FF.p==='all'||x[2].includes(FF.p))&&(FF.f==='all'||x[3]===FF.f));
+  const cnt=f=>FEAT.filter(x=>x[3]===f).length;
+  const pb=(k,l)=>`<button class="fbtn" data-ffp="${k}" aria-pressed="${FF.p===k}">${l}</button>`;
+  const fb=(k,l)=>`<button class="fbtn" data-fff="${k}" aria-pressed="${FF.f===k}">${l}</button>`;
+  let lastMod='';
+  const rows=list.map(x=>{const m=x[0]!==lastMod?x[0]:'';lastMod=x[0];return `<tr class="feat-mod"><td>${m}</td><td>${x[1]}</td><td><div class="who-chips">${x[2].split('').map(c=>`<span>${PERS[c]}</span>`).join('')}</div></td><td><span class="pill ${x[3]==='MVP'?'phase-mvp':x[3]==='Fase 2'?'phase-2':'phase-3'}">${x[3]==='MVP'?'1ª versão':x[3]}</span></td></tr>`;}).join('');
+  return `<div class="pagehead"><div><div class="eyebrow">Escopo completo</div><h1>Mapa de funcionalidades</h1></div>
+  <div class="factrow"><div><b>${FEAT.length}</b><span>funcionalidades</span></div><div><b>${cnt('MVP')}</b><span>na 1ª versão</span></div><div><b>${cnt('Fase 2')}</b><span>fase 2</span></div><div><b>${cnt('Fase 3')}</b><span>fase 3</span></div></div></div>
+  <p class="muted" style="max-width:80ch">Tudo o que a plataforma terá, por módulo, por público e por fase. Esta lista é a base da parte documental: cada linha vira requisito, tela e critério de aceite.</p>
+  <div class="filters">${pb('all','Todos os públicos')}${Object.entries(PERS).map(([k,l])=>pb(k,l)).join('')}</div>
+  <div class="filters">${fb('all','Todas as fases')}${fb('MVP','1ª versão')}${fb('Fase 2','Fase 2')}${fb('Fase 3','Fase 3')}</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Módulo</th><th>Funcionalidade</th><th>Quem usa</th><th>Fase</th></tr></thead><tbody>${rows||'<tr><td colspan="4" class="muted">Nada neste filtro.</td></tr>'}</tbody></table></div>`;
+}
+document.addEventListener('click',e=>{const p=e.target.closest('[data-ffp]');if(p){FF.p=p.dataset.ffp;render();return;}const f=e.target.closest('[data-fff]');if(f){FF.f=f.dataset.fff;render();}});
+
+/* ---------- tooltips ---------- */
+const tip=$('#tip');
+function showTip(html,ev){tip.innerHTML=html;tip.hidden=false;const w=tip.offsetWidth,h=tip.offsetHeight;let x=ev.clientX+14,y=ev.clientY+14;if(x+w>innerWidth-8)x=ev.clientX-w-14;if(y+h>innerHeight-8)y=ev.clientY-h-14;tip.style.left=x+'px';tip.style.top=y+'px';}
+function hideTip(){tip.hidden=true;}
+document.addEventListener('mousemove',e=>{
+  const t=e.target.closest('[data-tip]'); if(t){showTip(esc(t.dataset.tip),e);return;}
+  const sp=e.target.closest('[data-spark]');
+  if(sp){const vals=sp.dataset.spark.split(',').map(Number);const r=sp.getBoundingClientRect();const sc=r.width/240;const i=clamp(Math.round(((e.clientX-r.left)/sc-4)/((240-8-34)/(vals.length-1))),0,vals.length-1);const d=new Date();d.setDate(d.getDate()-(vals.length-1-i));showTip(`<b>${sp.dataset.name}</b><br>${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} · ${vals[i]}% de cumprimento`,e);return;}
+  const hit=e.target.closest('#eco-hit');
+  if(hit){const svg=hit.ownerSVGElement, r=svg.getBoundingClientRect(), W=ECO.W, L=ECO.L, Rr=ECO.R; const px=(e.clientX-r.left)*(W/r.width); const m=clamp(Math.round((px-L)/(W-L-Rr)*eco.h),0,eco.h); const c=ecoCalc(), p=c.months[m]; const xl=document.getElementById('eco-x'); const xx=L+m*(W-L-Rr)/eco.h; xl.setAttribute('x1',xx);xl.setAttribute('x2',xx);xl.setAttribute('opacity','.6'); showTip(`<b>${m===0?'Início':'Mês '+m}</b><br>Atual: ${brl(p.cur)}<br>Nova: ${brl(p.nw)}<br>Diferença: ${brl(p.cur-p.nw)}`,e);return;}
+  hideTip(); const xl=document.getElementById('eco-x'); if(xl) xl.setAttribute('opacity','0');
+});
+document.addEventListener('mouseleave',hideTip);
+
+/* ---------- toast ---------- */
+let tt; function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200);}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-toast]');if(b)toast(b.dataset.toast);});
+
+/* ---------- render ---------- */
+const VIEWS={notificacoes:vNotificacoes,encomendas:vEncomendas,acesso:vAcesso,morador:vMorador,funcionalidades:vFuncionalidades,visao:vVisao,condominios:vCondominios,alertas:vAlertas,portal:vPortal,app:vApp,usuarios:vUsuarios,master:vMaster,estudo:vEstudo,plano:vPlano,economia:vEconomia};
+function render(){ hideTip(); $('#view').innerHTML = VIEWS[state.view](); }
+window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(VIEWS[v]&&v!==state.view)go(v,false);});
+const initial = (location.hash||'').replace('#','');
+go(VIEWS[initial]?initial:'visao', false);
+})();
+</script>
+</body>
+</html>
