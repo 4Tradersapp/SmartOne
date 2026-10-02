@@ -1,27 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isValidPlanoAccessCookie, PLANO_ACCESS_COOKIE } from "@/lib/access";
 
 /**
- * Proteção simples da demonstração.
- * Se DEMO_USER e DEMO_PASSWORD estiverem definidos (Vercel → Settings → Environment Variables),
- * o navegador pede usuário e senha antes de abrir qualquer página. Sem as variáveis, o site fica aberto.
- * Quando o login real (Supabase Auth) entrar, este arquivo passa a cuidar só da sessão.
+ * Só a tela Plano passo a passo (/plano) exige senha (cookie após POST /api/access).
  */
-export function proxy(request: NextRequest) {
-  const user = process.env.DEMO_USER;
-  const pass = process.env.DEMO_PASSWORD;
-  if (!user || !pass) return NextResponse.next();
-
-  const header = request.headers.get("authorization");
-  if (header?.startsWith("Basic ")) {
-    const [u, p] = atob(header.slice(6)).split(":");
-    if (u === user && p === pass) return NextResponse.next();
+export async function proxy(request: NextRequest) {
+  const cookie = request.cookies.get(PLANO_ACCESS_COOKIE)?.value;
+  if (await isValidPlanoAccessCookie(cookie)) {
+    return NextResponse.next();
   }
-  return new NextResponse("Acesso restrito", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Smart One", charset="UTF-8"' },
-  });
+
+  const url = request.nextUrl.clone();
+  url.pathname = "/entrada";
+  url.searchParams.set("next", "/plano");
+  return NextResponse.redirect(url);
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|icon.svg).*)"],
+  matcher: ["/plano"],
 };
